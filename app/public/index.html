@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Viva Orders">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#faf8f5">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-180.png">
+<title>Viva Orders</title>
+<style>
+  :root {
+    --bg: #f6f4f0; --card: #ffffff; --ink: #1f1d1a; --ink2: #6b665e; --ink3: #9a948a;
+    --line: #e7e2d9; --soft: #f1ede6;
+    --blue: #2f6fdb; --blue-bg: #e8f0fd;
+    --green: #1f7a4d; --green-bg: #e4f4ea;
+    --amber: #8a5a00; --amber-bg: #fdf1d6;
+    --red: #b42318; --red-bg: #fdecea;
+    --purple: #6a3fb5; --purple-bg: #f0e9fb;
+    --gray-bg: #eeebe5;
+    --btn: #1f1d1a; --btn-ink: #ffffff;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141312; --card: #1f1e1c; --ink: #f2efe9; --ink2: #b0aa9f; --ink3: #7d776d;
+      --line: #33302c; --soft: #2a2825;
+      --blue: #8db4f7; --blue-bg: #1d2a40; --green: #6fd39c; --green-bg: #173323;
+      --amber: #f2c35b; --amber-bg: #3a2d10; --red: #ff8a80; --red-bg: #3d1a17;
+      --purple: #c3a6f5; --purple-bg: #2c2140; --gray-bg: #2c2a27;
+      --btn: #f2efe9; --btn-ink: #141312;
+    }
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink); }
+  body { font-size: 16px; line-height: 1.45; }
+  button { font: inherit; color: inherit; cursor: pointer; }
+  .wrap { max-width: 640px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 10px) 16px calc(env(safe-area-inset-bottom) + 96px); }
+  h1 { font-size: 26px; font-weight: 700; margin: 4px 0 2px; letter-spacing: -0.01em; }
+  .sub { color: var(--ink2); font-size: 15px; margin-bottom: 14px; }
+  .hide { display: none !important; }
+  .muted { color: var(--ink2); }
+  .small { font-size: 13px; }
+
+  /* bottom tabs (like the Etsy / Shopify seller apps) */
+  .tabs { position: fixed; left: 0; right: 0; bottom: 0; background: var(--card); border-top: 1px solid var(--line);
+          display: flex; justify-content: center; padding-bottom: env(safe-area-inset-bottom); z-index: 20; }
+  .tabs-in { display: flex; width: 100%; max-width: 640px; }
+  .tab { flex: 1; background: none; border: none; padding: 9px 0 8px; display: flex; flex-direction: column; align-items: center; gap: 2px; color: var(--ink3); font-size: 12px; font-weight: 600; position: relative; }
+  .tab .ic { font-size: 22px; line-height: 1; }
+  .tab.on { color: var(--ink); }
+  .badge { position: absolute; top: 4px; left: calc(50% + 8px); background: var(--red); color: #fff; font-size: 12px; font-weight: 700; min-width: 20px; height: 20px; border-radius: 10px; padding: 0 6px; display: flex; align-items: center; justify-content: center; }
+
+  /* approval screen */
+  .navrow { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .pager { display: flex; align-items: center; gap: 4px; color: var(--ink2); font-size: 15px; }
+  .pager button { background: var(--card); border: 1px solid var(--line); border-radius: 12px; width: 44px; height: 40px; font-size: 20px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; }
+  .card-top { padding: 14px 16px 10px; }
+  .who { font-size: 22px; font-weight: 700; }
+  .what { color: var(--ink2); font-size: 15px; }
+  .pill { display: inline-block; font-size: 13px; font-weight: 650; padding: 5px 10px; border-radius: 999px; margin-top: 8px; }
+  .p-blue { background: var(--blue-bg); color: var(--blue); }
+  .p-amber { background: var(--amber-bg); color: var(--amber); }
+  .p-red { background: var(--red-bg); color: var(--red); }
+  .p-green { background: var(--green-bg); color: var(--green); }
+  .p-purple { background: var(--purple-bg); color: var(--purple); }
+  .p-gray { background: var(--gray-bg); color: var(--ink2); }
+  .buyer-ask { margin: 10px 16px 4px; border-left: 4px solid var(--amber); background: var(--amber-bg); border-radius: 0 12px 12px 0; padding: 10px 12px; }
+  .buyer-ask .lbl { font-size: 12px; font-weight: 700; color: var(--amber); text-transform: uppercase; letter-spacing: 0.04em; }
+  .buyer-ask .txt { font-size: 17px; margin-top: 2px; }
+  .seg { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 16px 8px; }
+  .seg::-webkit-scrollbar { display: none; }
+  .seg button { flex: 0 0 auto; border: 1px solid var(--line); background: var(--card); border-radius: 999px; padding: 8px 14px; font-size: 15px; font-weight: 600; color: var(--ink2); }
+  .seg button.on { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .stage-img { background: var(--soft); display: flex; align-items: center; justify-content: center; min-height: 300px; position: relative; }
+  .stage-img img { width: 100%; max-height: 62vh; object-fit: contain; display: block; }
+  .stage-img .tag { position: absolute; left: 12px; top: 12px; background: rgba(0,0,0,0.62); color: #fff; font-size: 13px; font-weight: 600; padding: 4px 10px; border-radius: 999px; }
+  .stage-img .zoomhint { position: absolute; right: 12px; bottom: 12px; background: rgba(0,0,0,0.5); color: #fff; font-size: 12px; padding: 3px 9px; border-radius: 999px; }
+  .sbs { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; width: 100%; }
+  .sbs figure { margin: 0; position: relative; background: var(--soft); }
+  .sbs img { width: 100%; height: 100%; max-height: 52vh; object-fit: contain; display: block; }
+  .sbs figcaption { position: absolute; left: 8px; top: 8px; background: rgba(0,0,0,0.62); color: #fff; font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 999px; }
+  .strip { display: flex; gap: 6px; padding: 8px 16px 0; overflow-x: auto; }
+  .strip img { width: 54px; height: 54px; object-fit: cover; border-radius: 8px; border: 2px solid transparent; flex: 0 0 auto; background: var(--soft); }
+  .strip img.on { border-color: var(--ink); }
+  .photos-under { padding: 8px 16px 4px; }
+  .photos-under .lbl { font-size: 12px; font-weight: 700; color: var(--ink3); text-transform: uppercase; letter-spacing: 0.04em; margin: 0 0 6px; }
+  .photos-under .strip { padding: 0; }
+  .photos-under .strip img { width: 56px; height: 56px; cursor: zoom-in; }
+  .facts-line { padding: 10px 16px 0; color: var(--ink2); font-size: 14px; }
+  .botnote { margin: 10px 16px 0; background: var(--soft); border-radius: 12px; padding: 9px 12px; font-size: 15px; }
+  .botnote .lbl { font-size: 12px; color: var(--ink3); display: block; }
+  .actions { padding: 14px 16px 16px; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+  .big { width: 100%; min-height: 56px; border-radius: 14px; font-size: 18px; font-weight: 700; border: none; }
+  .go { background: var(--btn); color: var(--btn-ink); }
+  .go.one { margin-bottom: 8px; }
+  .alt { background: var(--card); border: 1.5px solid var(--line); }
+  .big:active { transform: scale(0.985); }
+  .big[disabled] { opacity: 0.55; }
+  .explain { text-align: center; color: var(--ink2); font-size: 13px; margin-top: 8px; }
+  textarea { width: 100%; font: inherit; font-size: 17px; border: 1.5px solid var(--line); border-radius: 12px; padding: 12px; background: var(--card); color: var(--ink); resize: vertical; min-height: 110px; }
+  .err { color: var(--red); font-size: 14px; margin: 6px 0; }
+  .link { background: none; border: none; color: var(--ink2); padding: 12px; width: 100%; font-size: 15px; }
+  .status { border-radius: 14px; padding: 14px; font-size: 16px; font-weight: 600; }
+  .status .s2 { display: block; font-size: 14px; font-weight: 400; margin-top: 3px; opacity: 0.9; }
+  .status.ok { background: var(--green-bg); color: var(--green); }
+  .status.warn { background: var(--amber-bg); color: var(--amber); }
+  .status.bad { background: var(--red-bg); color: var(--red); }
+  .status button { margin-top: 10px; background: var(--red); color: #fff; border: none; border-radius: 10px; padding: 10px 18px; font-weight: 700; }
+  .flagbox { margin: 8px 16px 0; padding: 9px 12px; border-radius: 12px; font-size: 14px; }
+  .flagbox.red { background: var(--red-bg); color: var(--red); }
+  .flagbox.amber { background: var(--amber-bg); color: var(--amber); }
+  .empty { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 40px 20px; text-align: center; }
+  .empty .big-ic { font-size: 44px; }
+  .empty h2 { margin: 8px 0 4px; font-size: 20px; }
+
+  /* order lists */
+  .list { background: var(--card); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
+  .row { display: flex; align-items: center; gap: 12px; width: 100%; padding: 13px 14px; border: none; border-top: 1px solid var(--line); background: none; text-align: left; }
+  .row:first-child { border-top: none; }
+  .row:active { background: var(--soft); }
+  .row .l { flex: 1; min-width: 0; }
+  .row .n { font-weight: 650; font-size: 16px; }
+  .row .d { font-size: 13px; color: var(--ink2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .row .f { font-size: 13px; font-weight: 600; margin-top: 2px; }
+  .row .f.red { color: var(--red); } .row .f.amber { color: var(--amber); }
+  .row .r { text-align: right; flex: 0 0 auto; }
+  .row .pill { margin-top: 0; font-size: 12px; padding: 4px 9px; }
+  .row .chev { color: var(--ink3); font-size: 18px; }
+  .sect { font-size: 13px; font-weight: 700; color: var(--ink3); text-transform: uppercase; letter-spacing: 0.05em; margin: 20px 4px 8px; }
+  .track { color: var(--blue); font-weight: 650; text-decoration: none; font-size: 14px; }
+  .more { width: 100%; background: none; border: none; border-top: 1px solid var(--line); padding: 13px; color: var(--blue); font-weight: 600; }
+
+  /* detail */
+  .back { background: none; border: none; color: var(--blue); font-size: 17px; padding: 6px 0; }
+  .facts { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 2px 14px; margin-top: 12px; }
+  .fact { display: flex; justify-content: space-between; gap: 14px; padding: 11px 0; border-top: 1px solid var(--line); font-size: 15px; }
+  .fact:first-child { border-top: none; }
+  .fact .k { color: var(--ink2); flex: 0 0 auto; }
+  .fact .v { text-align: right; overflow-wrap: anywhere; }
+  .ver { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 12px 14px; margin-top: 10px; }
+  .ver-imgs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px; }
+  .ver-imgs figure { margin: 0; }
+  .ver-imgs img { width: 100%; aspect-ratio: 4/5; object-fit: cover; border-radius: 9px; background: var(--soft); }
+  .ver-imgs figcaption { font-size: 12px; color: var(--ink3); text-align: center; }
+  .h2 { font-size: 18px; font-weight: 700; margin: 24px 0 6px; }
+  .hist { font-size: 14px; padding: 10px 0; border-top: 1px solid var(--line); }
+  .hist:first-child { border-top: none; }
+
+  /* buyer messages on the approve screen */
+  .msgs { margin: 12px 16px 0; border: 1px solid var(--line); border-radius: 14px; background: var(--soft); }
+  .msgs summary { list-style: none; display: flex; align-items: center; justify-content: space-between;
+                  padding: 11px 12px; font-weight: 650; font-size: 15px; cursor: pointer; user-select: none; }
+  .msgs summary::-webkit-details-marker { display: none; }
+  .msgs summary::after { content: "▾"; color: var(--ink3); font-size: 14px; }
+  .msgs:not([open]) summary::after { content: "▸"; }
+  .msg-thread { max-height: min(42vh, 360px); overflow-y: auto; -webkit-overflow-scrolling: touch;
+                padding: 0 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+  .msg { max-width: 92%; display: flex; flex-direction: column; gap: 3px; }
+  .msg.buyer { align-self: flex-start; }
+  .msg.shop { align-self: flex-end; }
+  .msg .who { font-size: 12px; font-weight: 700; padding: 0 2px; }
+  .msg.buyer .who { color: var(--amber); }
+  .msg.shop .who { color: var(--blue); }
+  .msg .at { font-size: 11px; font-weight: 500; color: var(--ink3); }
+  .msg .txt { background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+              padding: 8px 11px; font-size: 15px; line-height: 1.4; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .msg.shop .txt { background: var(--blue-bg); border-color: transparent; }
+  .msg img.thumb { width: 100%; max-height: 180px; object-fit: cover; border-radius: 10px;
+                   background: var(--card); border: 1px solid var(--line); cursor: zoom-in; }
+  .msgs .more-link { width: auto; padding: 4px 12px 12px; color: var(--blue); font-size: 14px; font-weight: 600; text-align: left; }
+
+  /* login / misc */
+  .login { max-width: 360px; margin: 18vh auto 0; padding: 0 20px; text-align: center; }
+  .login input { width: 100%; font-size: 18px; padding: 14px; border-radius: 14px; border: 1.5px solid var(--line); background: var(--card); color: var(--ink); margin: 18px 0 10px; }
+  .zoom { position: fixed; inset: 0; background: rgba(0,0,0,0.94); z-index: 50; display: flex; align-items: center; justify-content: center; overflow: auto; }
+  .zoom img { max-width: 100vw; max-height: 100vh; object-fit: contain; }
+  .zoom .x { position: fixed; top: calc(env(safe-area-inset-top) + 10px); right: 14px; background: rgba(255,255,255,0.2); color: #fff; border: none; border-radius: 999px; width: 44px; height: 44px; font-size: 24px; }
+  .demo { background: var(--amber-bg); color: var(--amber); font-size: 13px; text-align: center; padding: 6px 10px; border-radius: 10px; margin-bottom: 8px; }
+  .toast { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom) + 82px); transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 12px; font-size: 15px; z-index: 60; }
+  .refresh { background: none; border: none; color: var(--ink2); font-size: 15px; padding: 8px; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<nav id="tabs" class="tabs hide"><div class="tabs-in">
+  <button class="tab" id="t-approve" onclick="setTab('approve')"><span class="ic">✓</span>To approve<span class="badge hide" id="b-approve"></span></button>
+  <button class="tab" id="t-progress" onclick="setTab('progress')"><span class="ic">◷</span>In progress<span class="badge hide" id="b-progress"></span></button>
+  <button class="tab" id="t-done" onclick="setTab('done')"><span class="ic">✈︎</span>Shipped</button>
+</div></nav>
+<div id="zoom" class="zoom hide" onclick="closeZoom()"><button class="x" aria-label="Close">×</button><img id="zoomimg" alt=""></div>
+<div id="toast" class="toast hide"></div>
+
+<script>
+"use strict";
+// ---------------------------------------------------------------------------
+// Words and settings
+// ---------------------------------------------------------------------------
+const STAGE = {
+  problem:       { words: "Problem",         pill: "p-red" },
+  needs_ok:      { words: "Needs your OK",   pill: "p-blue" },
+  artist:        { words: "Artist working",  pill: "p-purple" },
+  waiting_buyer: { words: "With buyer",      pill: "p-amber" },
+  ordering:      { words: "Ordering",        pill: "p-gray" },
+  printing:      { words: "Printing",        pill: "p-gray" },
+  shipped:       { words: "Shipped",         pill: "p-green" },
+  delivered:     { words: "Delivered",       pill: "p-green" },
+};
+const PROGRESS_ORDER = ["problem", "waiting_buyer", "artist", "ordering", "printing"];
+const PROFIT_GOAL = 0.20;
+
+let STATE = { orders: [], decisions: [] };
+let DEMO = false;
+const ui = { tab: "approve", idx: 0, view: {}, adjusting: {}, drafts: {}, errors: {}, busy: {}, showDelivered: false, showMsgs: {}, pickOne: {} };
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+const $ = (id) => document.getElementById(id);
+function esc(s) {
+  return String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+function imgUrl(key) {
+  if (!key) return "";
+  if (DEMO || /^data:/.test(key)) return key;
+  return "/img/" + encodeURIComponent(key);
+}
+function todayPT() { return new Intl.DateTimeFormat("en-CA", { timeZone: "America/Los_Angeles" }).format(new Date()); }
+function dayDiff(a, b) { return Math.round((Date.parse(b + "T00:00:00Z") - Date.parse(a + "T00:00:00Z")) / 86400000); }
+function isDate(s) { return typeof s === "string" && /^\d{4}-\d{2}-\d{2}$/.test(s); }
+function niceDate(s) {
+  if (!isDate(s)) return s || "unknown";
+  return new Date(s + "T12:00:00Z").toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
+}
+function daysInStage(o) { return o.stage_since ? Math.max(0, Math.floor((Date.now() - Date.parse(o.stage_since)) / 86400000)) : 0; }
+function daysWords(n) { return n === 0 ? "today" : n === 1 ? "1 day" : n + " days"; }
+function money(n) { return "$" + Number(n).toFixed(2); }
+function ordinal(n) { return n + (n % 10 === 1 && n !== 11 ? "st" : n % 10 === 2 && n !== 12 ? "nd" : n % 10 === 3 && n !== 13 ? "rd" : "th"); }
+function toast(msg) {
+  const t = $("toast"); t.textContent = msg; t.classList.remove("hide");
+  clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.add("hide"), 2600);
+}
+function trackingUrl(carrier, number) {
+  if (!number) return null;
+  const n = String(number).replace(/\s+/g, "");
+  let c = String(carrier || "").toUpperCase();
+  if (!c) {
+    if (/^1Z[0-9A-Z]{16}$/i.test(n)) c = "UPS";
+    else if (/^(94|93|92|95|82)\d{18,20}$/.test(n) || /^420\d{5,9}9\d{21}$/.test(n)) c = "USPS";
+    else if (/^[CD]\d{14}$/i.test(n)) c = "ONTRAC";
+    else if (/^\d{12}$|^\d{15}$/.test(n)) c = "FEDEX";
+    else if (/^\d{10}$/.test(n)) c = "DHL";
+  }
+  const e = encodeURIComponent(n);
+  if (c.includes("UPS")) return "https://www.ups.com/track?tracknum=" + e;
+  if (c.includes("USPS")) return "https://tools.usps.com/go/TrackConfirmAction?tLabels=" + e;
+  if (c.includes("FEDEX")) return "https://www.fedex.com/fedextrack/?trknbr=" + e;
+  if (c.includes("DHL")) return "https://www.dhl.com/us-en/home/tracking.html?tracking-id=" + e;
+  if (c.includes("ONTRAC")) return "https://www.ontrac.com/tracking/?number=" + e;
+  return "https://www.google.com/search?q=" + encodeURIComponent((carrier || "") + " tracking " + n);
+}
+
+// Red / amber warnings in plain words
+function flagsFor(o) {
+  const out = [], today = todayPT();
+  const notShipped = !["shipped", "delivered"].includes(o.stage);
+  if (o.stage === "problem") out.push({ level: "red", short: "Problem", long: "A bot marked this order as a problem." });
+  if (isDate(o.ship_by) && isDate(o.printify_est_ship) && o.printify_est_ship > o.ship_by && notShipped)
+    out.push({ level: "red", short: "Will ship late", long: `Printify expects to ship ${niceDate(o.printify_est_ship)}, after the Etsy ship-by date (${niceDate(o.ship_by)}).` });
+  if (isDate(o.ship_by) && notShipped && o.ship_by <= today)
+    out.push({ level: "red", short: o.ship_by === today ? "Must ship today" : "Past ship-by date", long: `Etsy ship-by date was ${niceDate(o.ship_by)} and it hasn't shipped.` });
+  else if (isDate(o.ship_by) && notShipped && !o.tracking_number && dayDiff(today, o.ship_by) <= 2)
+    out.push({ level: "amber", short: "Ship-by in " + daysWords(dayDiff(today, o.ship_by)), long: `Etsy ship-by is ${niceDate(o.ship_by)} and there's no tracking yet.` });
+  const d = daysInStage(o);
+  if (o.stage === "needs_ok" && d >= 2) out.push({ level: "amber", short: `Waiting on you ${d} days`, long: `This has been waiting on you for ${d} days.` });
+  if (o.stage === "waiting_buyer" && d >= 2) out.push({ level: "amber", short: `Buyer quiet ${d} days`, long: `The buyer hasn't answered in ${d} days.` });
+  return out;
+}
+function topFlag(o) { const f = flagsFor(o); return f.find((x) => x.level === "red") || f[0] || null; }
+function reviewKey(o) { return `${o.order_id}|${o.review.kind}|${o.review.version || ""}`; }
+function decisionFor(o) {
+  if (!o.review || !o.review.kind) return null;
+  const k = reviewKey(o);
+  return STATE.decisions.find((d) => d.review_key === k) || null;
+}
+
+// Is this a first look, or a re-do after the buyer asked for changes?
+function roundInfo(o) {
+  const r = o.review || {};
+  if (r.kind !== "art_proof") return { round: null };
+  const key = reviewKey(o);
+  const approvals = STATE.decisions
+    .filter((d) => d.order_id === o.order_id && d.kind === "art_proof" && d.action === "approve" && d.review_key !== key)
+    .sort((a, b) => a.decided_at.localeCompare(b.decided_at));
+  const round = Number(r.round) || approvals.length + 1;
+  let prevImage = r.previous || null, prevLabel = null;
+  const last = approvals[approvals.length - 1];
+  if (!prevImage && last && Array.isArray(o.versions)) {
+    const v = o.versions.find((x) => x.version === last.version);
+    const im = v && (v.images || []).find((i) => (i.label || "") === (last.option || "")) || (v && (v.images || []).find((i) => i.label !== "compare"));
+    if (im) prevImage = im.image;
+  }
+  if (last) prevLabel = `${last.version || ""}${last.option || ""}`;
+  const feedback = r.buyer_feedback || (round > 1 ? o.latest_request : null);
+  return { round, prevImage, prevLabel, feedback };
+}
+
+// ---------------------------------------------------------------------------
+// Server
+// ---------------------------------------------------------------------------
+async function api(path, opts = {}) {
+  const res = await fetch(path, {
+    method: opts.method || "GET",
+    headers: { "Content-Type": "application/json", "x-viva": "1" },
+    body: opts.body ? JSON.stringify(opts.body) : undefined,
+    credentials: "same-origin",
+  });
+  let data = null;
+  try { data = await res.json(); } catch (e) {}
+  if (res.status === 401 && path !== "/api/login") { showLogin(); throw new Error("login"); }
+  if (!res.ok) { const err = new Error((data && data.error) || "Something went wrong."); err.data = data; err.status = res.status; throw err; }
+  return data;
+}
+async function load(quiet) {
+  if (DEMO) { render(); return; }
+  try { STATE = await api("/api/state"); render(); }
+  catch (e) { if (e.message !== "login" && !quiet) toast("Couldn't load. Check your connection."); }
+}
+
+async function decide(orderId, action, option) {
+  const o = STATE.orders.find((x) => x.order_id === orderId);
+  if (!o) return;
+  const opts = (o.review && o.review.options) || [];
+  if (action === "approve" && !option) option = opts.length === 1 ? (opts[0].label || "all") : "all";
+  const text = (ui.drafts[orderId] || "").trim();
+  ui.errors[orderId] = "";
+  if (action === "adjust" && !text) { ui.errors[orderId] = "Type what to change first."; render(); return; }
+  ui.busy[orderId] = action + (option || ""); render();
+  try {
+    if (DEMO) {
+      await new Promise((r) => setTimeout(r, 450));
+      const target = action === "approve" || o.review.kind === "printify_mockup" ? "Messanger" : (o.review.artist_bot || o.artist_bot || "Designer");
+      STATE.decisions.unshift({ id: "demo-" + Date.now(), order_id: orderId, review_key: reviewKey(o), kind: o.review.kind, action,
+        option: option || null, version: o.review.version, adjust_text: action === "adjust" ? text : null, target_bot: target,
+        decided_by: "Derek", decided_at: new Date().toISOString(), webhook_status: "delivered", status: "pending" });
+    } else {
+      const r = await api("/api/decisions", { method: "POST", body: { order_id: orderId, review_key: reviewKey(o), action, option: option || null, adjust_text: action === "adjust" ? text : null } });
+      STATE.decisions.unshift(r.decision);
+    }
+    ui.adjusting[orderId] = false; ui.drafts[orderId] = "";
+  } catch (e) {
+    if (e.data && e.data.decision) STATE.decisions.unshift(e.data.decision);
+    else if (e.message !== "login") ui.errors[orderId] = e.message;
+    if (e.status === 409 && !(e.data && e.data.decision)) load(true);
+  }
+  ui.busy[orderId] = null; render();
+}
+async function retry(id, force) {
+  try {
+    const r = await api(`/api/decisions/${id}/retry${force ? "?force=1" : ""}`, { method: "POST" });
+    const i = STATE.decisions.findIndex((d) => d.id === id);
+    if (i >= 0) STATE.decisions[i] = r.decision;
+    render(); toast(r.decision.webhook_status === "delivered" ? "Delivered" : "Still not delivered");
+  } catch (e) { if (e.message !== "login") toast(e.message); }
+}
+
+// ---------------------------------------------------------------------------
+// Login
+// ---------------------------------------------------------------------------
+function showLogin(msg) {
+  $("tabs").classList.add("hide");
+  $("app").innerHTML = `<div class="login"><h1>Viva Orders</h1><p class="muted">Enter your password</p>
+    <form onsubmit="doLogin(event)"><input id="pw" type="password" autocomplete="current-password" placeholder="Password" autofocus>
+    ${msg ? `<div class="err">${esc(msg)}</div>` : ""}<button class="big go" type="submit">Log in</button></form></div>`;
+}
+async function doLogin(ev) {
+  ev.preventDefault();
+  const pw = $("pw").value;
+  if (!pw) { showLogin("Type your password first."); return; }
+  try { await api("/api/login", { method: "POST", body: { password: pw } }); await load(); }
+  catch (e) { showLogin(e.message); }
+}
+
+// ---------------------------------------------------------------------------
+// Screens
+// ---------------------------------------------------------------------------
+function toApprove() {
+  // Waiting on Derek: undecided first (red flags first, then ship-by), decided ones at the end until bots move them.
+  const list = STATE.orders.filter((o) => o.stage === "needs_ok");
+  // Order stays put after a tap, so the card shows "Sent ✓" instead of jumping to another order.
+  const score = (o) => (topFlag(o) && topFlag(o).level === "red" ? 0 : 1);
+  return list.sort((a, b) => score(a) - score(b) || (a.ship_by || "9").localeCompare(b.ship_by || "9"));
+}
+
+function render() {
+  $("tabs").classList.remove("hide");
+  const waiting = toApprove().filter((o) => !decisionFor(o)).length;
+  const b = $("b-approve"); b.textContent = waiting; b.classList.toggle("hide", !waiting);
+  const probs = STATE.orders.filter((o) => o.stage === "problem" || (PROGRESS_ORDER.includes(o.stage) && topFlag(o) && topFlag(o).level === "red")).length;
+  const bp = $("b-progress"); bp.textContent = probs; bp.classList.toggle("hide", !probs);
+  for (const t of ["approve", "progress", "done"]) $("t-" + t).classList.toggle("on", ui.tab === t && !location.hash);
+
+  const m = location.hash.match(/^#order-(.+)$/);
+  if (m) { renderDetail(decodeURIComponent(m[1])); scrollMsgThreads(); return; }
+  if (ui.tab === "progress") return renderProgress();
+  if (ui.tab === "done") return renderDone();
+  renderApprove();
+  scrollMsgThreads();
+}
+
+function header(title, subtitle) {
+  return `${DEMO ? `<div class="demo">Preview with sample orders and sample pictures. Nothing is sent.</div>` : ""}
+    <div class="navrow" style="margin-bottom:0"><h1>${esc(title)}</h1><button class="refresh" onclick="load()">↻</button></div>
+    <div class="sub">${subtitle}</div>`;
+}
+
+function renderApprove() {
+  const list = toApprove();
+  const waiting = list.filter((o) => !decisionFor(o)).length;
+  let h = `<div class="wrap">` + header("To approve",
+    waiting ? `${waiting} waiting on you` : (list.length ? "All done. The bots are on it." : "Nothing waiting on you"));
+  if (!list.length) {
+    h += `<div class="empty"><div class="big-ic">🎉</div><h2>You're all caught up</h2><div class="muted">New mockups show up here when an artist finishes one.</div></div></div>`;
+    $("app").innerHTML = h; return;
+  }
+  if (ui.idx >= list.length) ui.idx = list.length - 1;
+  if (ui.idx < 0) ui.idx = 0;
+  const o = list[ui.idx];
+  if (list.length > 1) {
+    h += `<div class="navrow"><span class="muted small">Order ${ui.idx + 1} of ${list.length}</span>
+      <span class="pager"><button onclick="step(-1)" aria-label="Previous">‹</button><button onclick="step(1)" aria-label="Next">›</button></span></div>`;
+  }
+  h += renderReview(o, list.length > 1) + `</div>`;
+  $("app").innerHTML = h;
+}
+
+function renderReview(o, hasNext) {
+  const id = o.order_id, r = o.review || {}, d = decisionFor(o);
+  const isPfy = r.kind === "printify_mockup";
+  const opts = Array.isArray(r.options) ? r.options : [];
+  const ri = roundInfo(o);
+  const artist = r.artist_bot || o.artist_bot || "the artist";
+  const photos = (Array.isArray(r.photos) && r.photos.length ? r.photos : o.photos) || [];
+
+  // What kind of approval this is, in plain words
+  let pill;
+  if (isPfy) pill = `<span class="pill p-green">Last check before ordering</span>`;
+  else if (ri.round > 1) pill = `<span class="pill p-amber">Buyer wants changes · ${ordinal(ri.round)} approval</span>`;
+  else pill = `<span class="pill p-blue">New mockup · 1st approval</span>`;
+
+  let h = `<div class="card"><div class="card-top">
+      <div class="who">${esc(o.buyer_first_name || "Buyer")}</div>
+      <div class="what">${esc(o.product || "")}</div>${pill}</div>`;
+
+  if (!isPfy && ri.round > 1 && ri.feedback) {
+    h += `<div class="buyer-ask"><div class="lbl">The buyer asked for</div><div class="txt">${esc(ri.feedback)}</div></div>`;
+  } else if (!isPfy && o.latest_request && ri.round === 1) {
+    h += `<div class="botnote" style="margin-top:0"><span class="lbl">What they asked for</span>${esc(o.latest_request)}</div>`;
+  }
+  const tf = topFlag(o);
+  if (tf) h += `<div class="flagbox ${tf.level}">${esc(tf.long)}</div>`;
+
+  // Mockups stay large on top. Buyer reference photos are a small strip below,
+  // never a replacement for the design (that was hiding mockups behind "Their photos").
+  const views = [];
+  opts.forEach((op, i) => views.push({ key: "opt" + i, label: isPfy ? "Printify mockup" : (opts.length > 1 ? `Mockup ${op.label}` : "Mockup"), img: op.image }));
+  if (!isPfy && ri.round > 1 && ri.prevImage) {
+    views.push({ key: "prev", label: "Sent before", img: ri.prevImage });
+    if (opts.length) views.push({ key: "ba", label: "Before + after" });
+  }
+  if (r.compare) views.push({ key: "compare", label: "Compare sheet", img: r.compare });
+  if (photos.length && opts.length && !isPfy) views.push({ key: "sbs", label: "Photo + mockup" });
+
+  if (!views.length) {
+    h += `<div class="stage-img"><div class="muted" style="padding:30px 20px;text-align:center">No mockup is attached yet. ${photos.length ? "The pictures below are the buyer's reference photos, not the design." : "The artist needs to add the mockup picture."}</div></div>`;
+  } else {
+    let cur = ui.view[id];
+    // Never keep an old "photo" tab as the main view.
+    if (cur === "photo" || !views.some((v) => v.key === cur)) cur = views[0].key;
+    const v = views.find((x) => x.key === cur);
+    if (views.length > 1) h += `<div class="seg">${views.map((x) => `<button class="${x.key === cur ? "on" : ""}" onclick="setView('${esc(id)}','${x.key}')">${esc(x.label)}</button>`).join("")}</div>`;
+    if (cur === "sbs" || cur === "ba") {
+      const mock = opts[0];
+      const pIdx = ui.view[id + ":p"] || 0;
+      const leftImg = cur === "ba" ? ri.prevImage : (photos[pIdx] || photos[0]);
+      const leftLbl = cur === "ba" ? "Before" + (ri.prevLabel ? " (" + esc(ri.prevLabel) + ")" : "") : "Their photo";
+      h += `<div class="sbs">
+        <figure><img src="${esc(imgUrl(leftImg))}" alt="" onclick="zoom(this.src)"><figcaption>${leftLbl}</figcaption></figure>
+        <figure><img src="${esc(imgUrl(mock.image))}" alt="Mockup" onclick="zoom(this.src)"><figcaption>${cur === "ba" ? "New" + (r.version ? " (" + esc(r.version) + ")" : "") : (opts.length > 1 ? "Mockup " + esc(mock.label) : "Mockup")}</figcaption></figure></div>`;
+      if (opts.length > 1) h += `<div class="explain">Shows mockup ${esc(opts[0].label)}. Tap a picture to zoom.</div>`;
+    } else {
+      const src = v.img;
+      h += `<div class="stage-img"><img src="${esc(imgUrl(src))}" alt="${esc(v.label)}" onclick="zoom(this.src)"><span class="tag">${esc(v.label)}${cur === "prev" && ri.prevLabel ? " (" + esc(ri.prevLabel) + ")" : ""}</span><span class="zoomhint">Tap to zoom</span></div>`;
+    }
+  }
+  if (photos.length) {
+    h += `<div class="photos-under"><div class="lbl">Buyer photos · tap to zoom</div>
+      <div class="strip">${photos.slice(0, 10).map((ph) => `<img src="${esc(imgUrl(ph))}" alt="Buyer photo" onclick="zoom(this.src)">`).join("")}</div></div>`;
+  }
+
+  const bits = [];
+  if (r.version) bits.push(esc(r.version));
+  if (!isPfy && r.artist_bot) bits.push("by " + esc(r.artist_bot));
+  if (isDate(o.ship_by)) bits.push("ship by " + niceDate(o.ship_by));
+  bits.push("waiting " + daysWords(daysInStage(o)));
+  h += `<div class="facts-line">${bits.join(" · ")}</div>`;
+  if (r.note) h += `<div class="botnote"><span class="lbl">Note from ${esc(isPfy ? "Messanger" : artist)}</span>${esc(r.note)}</div>`;
+
+  h += renderMessages(o);
+
+  // Buttons
+  h += `<div class="actions">`;
+  if (d) {
+    h += renderDecisionStatus(d);
+    if (hasNext) h += `<button class="big alt" style="margin-top:10px" onclick="step(1)">Next order ›</button>`;
+  } else if (ui.adjusting[id]) {
+    const to = isPfy ? "Messanger" : artist;
+    h += `<textarea id="ta-${esc(id)}" placeholder="What should change? Your exact words go to ${esc(to)}." oninput="draft('${esc(id)}', this.value)">${esc(ui.drafts[id] || "")}</textarea>`;
+    if (ui.errors[id]) h += `<div class="err">${esc(ui.errors[id])}</div>`;
+    h += `<button class="big go" style="margin-top:8px" ${ui.busy[id] ? "disabled" : ""} onclick="decide('${esc(id)}','adjust')">${ui.busy[id] ? "Sending…" : "Send to " + esc(to)}</button>
+      <button class="link" onclick="setAdjust('${esc(id)}', false)">Cancel</button>`;
+  } else {
+    if (ui.errors[id]) h += `<div class="err">${esc(ui.errors[id])}</div>`;
+    if (opts.length >= 1) {
+      const allOpt = opts.length > 1 ? "all" : (opts[0].label || "all");
+      const allLabel = isPfy
+        ? (opts.length > 1 ? "Approve and order all " + opts.length : "Approve and order")
+        : (opts.length > 1 ? "Approve & send all " + opts.length : "Approve");
+      h += `<button class="big go one" ${ui.busy[id] ? "disabled" : ""} onclick="decide('${esc(id)}','approve','${esc(allOpt)}')">${ui.busy[id] === "approve" + allOpt ? "Sending…" : allLabel}</button>`;
+    }
+    h += `<button class="big alt" onclick="setAdjust('${esc(id)}', true)">Ask for changes</button>`;
+    if (!isPfy && opts.length > 1) {
+      if (ui.pickOne[id]) {
+        h += `<div class="two" style="margin-top:8px">${opts.map((op) => `<button class="big alt" ${ui.busy[id] ? "disabled" : ""} onclick="decide('${esc(id)}','approve','${esc(op.label)}')">${ui.busy[id] === "approve" + op.label ? "Sending…" : "Approve just " + esc(op.label)}</button>`).join("")}</div>
+          <button class="link small" onclick="setPickOne('${esc(id)}', false)">Cancel</button>`;
+      } else {
+        h += `<button class="link small" onclick="setPickOne('${esc(id)}', true)">or approve just one…</button>`;
+      }
+    }
+    h += `<div class="explain">${isPfy ? "Approve tells Messanger to place the Printify order." : (opts.length > 1 ? "Approve sends all " + opts.length + " shown mockups to the buyer on Etsy." : "Approve sends this mockup to the buyer on Etsy.")}</div>`;
+  }
+  h += `<button class="link small" onclick="openOrder('${esc(id)}')">Order details and history ›</button></div></div>`;
+  return h;
+}
+
+function renderMessages(o) {
+  const all = Array.isArray(o.messages) ? o.messages : [];
+  if (!all.length) return "";
+  const id = o.order_id;
+  const showAll = !!ui.showMsgs[id];
+  const PREVIEW = 5;
+  const msgs = (showAll || all.length <= PREVIEW) ? all : all.slice(-PREVIEW);
+  const buyerName = o.buyer_first_name || "Buyer";
+  let h = `<details class="msgs" open>
+    <summary>Buyer messages · ${all.length}</summary>
+    <div class="msg-thread">`;
+  for (const m of msgs) {
+    const isShop = m.from === "shop";
+    const isShot = !!(m.image && !m.text);
+    const who = isShop ? "Shop" : (isShot ? "Screenshot" : buyerName);
+    h += `<div class="msg ${isShop ? "shop" : "buyer"}"><div class="who">${esc(who)}${m.at ? `<span class="at"> · ${esc(m.at)}</span>` : ""}</div>`;
+    if (m.text) h += `<div class="txt">${esc(m.text)}</div>`;
+    if (m.image) h += `<img class="thumb" src="${esc(imgUrl(m.image))}" alt="" onclick="zoom(this.src)">`;
+    h += `</div>`;
+  }
+  h += `</div>`;
+  if (all.length > PREVIEW) {
+    const label = showAll ? `Show last ${PREVIEW}` : `Show all ${all.length}`;
+    h += `<button class="link more-link" onclick="event.preventDefault(); setShowMsgs('${esc(id)}', ${showAll ? "false" : "true"})">${label}</button>`;
+  }
+  h += `</details>`;
+  return h;
+}
+
+function renderDecisionStatus(d) {
+  const what = d.action === "approve"
+    ? (d.kind === "printify_mockup" ? "Approved, order it" : (d.option === "all" ? "Approved all mockups" : `Approved${d.option ? " " + esc(d.option) : ""}`))
+    : "Changes requested";
+  if (d.status === "done") return `<div class="status ok">✓ ${what}. Done.<span class="s2">${esc(d.last_note || "")}</span></div>`;
+  // Set by the server's delivery guarantee: it re-woke the bot several times and nothing happened.
+  if (d.delivery_state === "stuck") return `<div class="status bad">${what}, but ${esc(d.target_bot)} hasn't finished it.<span class="s2">The app re-woke ${esc(d.target_bot)} ${Number(d.auto_wakes) || 0}×${d.last_note ? ". Last: " + esc(d.last_note) : ""}. Your decision is saved.</span><button onclick="retry('${esc(d.id)}', true)">Resend</button></div>`;
+  if (d.webhook_status === "delivered" && d.last_note_at) return `<div class="status ok">✓ ${what}. ${esc(d.last_note_by || d.target_bot)} is on it.<span class="s2">${esc(d.last_note || "")}${Number(d.auto_wakes) ? ` · app reminded them ${Number(d.auto_wakes)}×` : ""}</span></div>`;
+  if (d.webhook_status === "delivered") return `<div class="status ok">✓ ${what}. Sent to ${esc(d.target_bot)}.<span class="s2">${esc(d.last_note ? d.last_note_by + ": " + d.last_note : (d.action === "approve" && d.kind === "art_proof" ? "Messanger will send it to the buyer." : d.target_bot + " will pick it up."))}</span></div>`;
+  if (d.webhook_status === "not_configured") return `<div class="status warn">✓ ${what}. Saved.<span class="s2">${esc(d.target_bot)} will see it on its next check.</span></div>`;
+  if (d.webhook_status === "sending") return `<div class="status warn">${what}. Sending to ${esc(d.target_bot)}…</div>`;
+  return `<div class="status bad">${what}, but it didn't reach ${esc(d.target_bot)}.<span class="s2">${esc(d.webhook_error || "")} Your decision is saved.</span><button onclick="retry('${esc(d.id)}')">Retry</button></div>`;
+}
+
+function orderRow(o, opts = {}) {
+  const st = STAGE[o.stage] || { words: o.stage, pill: "p-gray" };
+  const f = topFlag(o);
+  const bits = [esc(o.product || "")];
+  let right = `<span class="pill ${st.pill}">${esc(st.words)}</span>`;
+  if (opts.shipRight) right = `<span class="small muted">${isDate(o.ship_by) ? "ship by<br>" + niceDate(o.ship_by) : ""}</span>`;
+  if (opts.tracking && o.tracking_number) right = `<a class="track" href="${esc(trackingUrl(o.tracking_carrier, o.tracking_number))}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Track ${esc(o.tracking_carrier || "")} ↗</a>`;
+  return `<button class="row" onclick="openOrder('${esc(o.order_id)}')">
+    <span class="l"><div class="n">${esc(o.buyer_first_name || "Buyer")}</div><div class="d">${bits.join(" · ")}</div>
+    ${f && !opts.noFlags ? `<div class="f ${f.level}">${f.level === "red" ? "● " : ""}${esc(f.short)}</div>` : ""}</span>
+    <span class="r">${right}</span><span class="chev">›</span></button>`;
+}
+
+function renderProgress() {
+  const list = STATE.orders.filter((o) => PROGRESS_ORDER.includes(o.stage));
+  const rank = (o) => (topFlag(o) && topFlag(o).level === "red" ? 0 : 1) * 10 + PROGRESS_ORDER.indexOf(o.stage);
+  list.sort((a, b) => rank(a) - rank(b) || (a.ship_by || "9").localeCompare(b.ship_by || "9"));
+  const urgent = list.filter((o) => topFlag(o) && topFlag(o).level === "red");
+  const rest = list.filter((o) => !urgent.includes(o));
+  let h = `<div class="wrap">` + header("In progress", `${list.length} order${list.length === 1 ? "" : "s"} being worked on`);
+  if (!list.length) h += `<div class="empty"><div class="big-ic">☕️</div><h2>Nothing in progress</h2></div>`;
+  if (urgent.length) h += `<div class="sect" style="color:var(--red)">Needs attention</div><div class="list">${urgent.map((o) => orderRow(o)).join("")}</div>`;
+  const groups = [["waiting_buyer", "Waiting on the buyer"], ["artist", "Artist working on it"], ["ordering", "Ordering at Printify"], ["printing", "Printing"]];
+  for (const [stage, title] of groups) {
+    const g = rest.filter((o) => o.stage === stage);
+    if (g.length) h += `<div class="sect">${title} · ${g.length}</div><div class="list">${g.map((o) => orderRow(o, { shipRight: true })).join("")}</div>`;
+  }
+  $("app").innerHTML = h + `</div>`;
+}
+
+function renderDone() {
+  const shipped = STATE.orders.filter((o) => o.stage === "shipped");
+  const delivered = STATE.orders.filter((o) => o.stage === "delivered");
+  let h = `<div class="wrap">` + header("Shipped", `${shipped.length} on the way · ${delivered.length} delivered`);
+  if (shipped.length) h += `<div class="sect">On the way</div><div class="list">${shipped.map((o) => orderRow(o, { tracking: true, noFlags: true })).join("")}</div>`;
+  if (delivered.length) {
+    h += `<div class="sect">Delivered</div><div class="list">`;
+    const show = ui.showDelivered ? delivered : delivered.slice(0, 3);
+    h += show.map((o) => orderRow(o, { noFlags: true })).join("");
+    if (delivered.length > 3) h += `<button class="more" onclick="ui.showDelivered=!ui.showDelivered;render()">${ui.showDelivered ? "Show less" : `Show all ${delivered.length}`}</button>`;
+    h += `</div>`;
+  }
+  if (!shipped.length && !delivered.length) h += `<div class="empty"><div class="big-ic">📦</div><h2>Nothing shipped yet</h2></div>`;
+  $("app").innerHTML = h + `</div>`;
+}
+
+function renderDetail(id) {
+  const o = STATE.orders.find((x) => x.order_id === id);
+  let h = `<div class="wrap"><button class="back" onclick="goBack()">‹ Back</button>`;
+  if (!o) { $("app").innerHTML = h + `<div class="empty">This order isn't on the board anymore.</div></div>`; return; }
+  const st = STAGE[o.stage] || { words: o.stage, pill: "p-gray" };
+  h += `<h1>${esc(o.buyer_first_name || "Buyer")}</h1><div class="sub" style="margin-bottom:4px">${esc(o.product || "")}</div><span class="pill ${st.pill}" style="margin-top:0">${esc(st.words)} · ${daysWords(daysInStage(o))}</span>`;
+  for (const f of flagsFor(o)) h += `<div class="flagbox ${f.level}" style="margin:8px 0 0">${esc(f.long)}</div>`;
+
+  if (o.stage === "needs_ok" && o.review) h += `<div style="margin-top:14px">${renderReview(o, false)}</div>`;
+  else if ((o.messages || []).length) h += `<div style="margin-top:14px">${renderMessages(o)}</div>`;
+
+  const facts = [];
+  if (o.next_step) facts.push(["Next step", esc(o.next_step)]);
+  if (o.latest_request) facts.push(["Latest from buyer", esc(o.latest_request)]);
+  facts.push(["Etsy ship-by", esc(niceDate(o.ship_by))]);
+  if (o.printify_order_id) facts.push(["Printify order", esc(o.printify_order_id)]);
+  if (o.printify_est_ship) facts.push(["Printify est. ship", esc(niceDate(o.printify_est_ship))]);
+  if (o.tracking_number) facts.push(["Tracking", `<a class="track" href="${esc(trackingUrl(o.tracking_carrier, o.tracking_number))}" target="_blank" rel="noopener">${esc((o.tracking_carrier ? o.tracking_carrier + " " : "") + o.tracking_number)} ↗</a>${o.tracking_note ? `<div class="small muted">${esc(o.tracking_note)}</div>` : ""}`]);
+  if (o.artist_bot) facts.push(["Artist", esc(o.artist_bot)]);
+  if (typeof o.etsy_net === "number" && typeof o.printify_cost === "number" && o.etsy_net > 0) {
+    const p = o.etsy_net - o.printify_cost, pct = p / o.etsy_net;
+    facts.push(["Profit", `<span style="color:var(${pct >= PROFIT_GOAL ? "--green" : "--red"})">${money(p)} (${Math.round(pct * 100)}%)</span> <span class="small muted">goal 20%</span>`]);
+  }
+  facts.push(["Etsy order", esc(o.order_id)]);
+  if (o.updated_at) facts.push(["Last update", esc(o.updated_at + (o.updated_by ? " — " + o.updated_by : ""))]);
+  h += `<div class="facts">${facts.map(([k, v]) => `<div class="fact"><span class="k">${k}</span><span class="v">${v}</span></div>`).join("")}</div>`;
+
+  const photos = o.photos || [];
+  if (photos.length) h += `<div class="h2">Buyer's photos</div><div class="ver"><div class="ver-imgs">${photos.map((p) => `<figure><img src="${esc(imgUrl(p))}" loading="lazy" alt="" onclick="zoom(this.src)"></figure>`).join("")}</div></div>`;
+  const versions = Array.isArray(o.versions) ? o.versions.slice().reverse() : [];
+  if (versions.length) {
+    h += `<div class="h2">All mockup versions</div>`;
+    for (const v of versions) {
+      h += `<div class="ver"><b>${esc(v.version || "")}</b>${v.made_by ? ` <span class="muted small">by ${esc(v.made_by)}</span>` : ""}
+        ${v.note ? `<div class="small muted">${esc(v.note)}</div>` : ""}
+        <div class="ver-imgs">${(v.images || []).map((im) => `<figure><img src="${esc(imgUrl(im.image))}" loading="lazy" alt="" onclick="zoom(this.src)"><figcaption>${esc(im.label === "compare" ? "compare" : im.label || "")}</figcaption></figure>`).join("")}</div></div>`;
+    }
+  }
+  const hist = STATE.decisions.filter((d) => d.order_id === o.order_id);
+  if (hist.length) {
+    h += `<div class="h2">Your decisions</div><div class="facts">${hist.map((d) => {
+      const when = new Date(d.decided_at).toLocaleString("en-US", { timeZone: "America/Los_Angeles", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+      const what = d.action === "approve" ? `Approved ${esc(d.version || "")}${d.option ? " " + esc(d.option) : ""}${d.kind === "printify_mockup" ? " (Printify)" : ""}` : `Asked for changes to ${esc(d.version || "")}: “${esc(d.adjust_text)}”`;
+      return `<div class="hist"><div>${what}</div><div class="small muted">${esc(when)} PT · to ${esc(d.target_bot)} · ${d.status === "done" ? "done" : esc(d.webhook_status)}${d.last_note ? " · " + esc(d.last_note) : ""}</div></div>`;
+    }).join("")}</div>`;
+  }
+  $("app").innerHTML = h + `</div>`;
+  window.scrollTo(0, 0);
+}
+
+// ---------------------------------------------------------------------------
+// Actions
+// ---------------------------------------------------------------------------
+function setTab(t) { ui.tab = t; if (location.hash) location.hash = ""; render(); window.scrollTo(0, 0); }
+function step(n) { ui.idx += n; const len = toApprove().length; if (ui.idx >= len) ui.idx = 0; if (ui.idx < 0) ui.idx = len - 1; render(); window.scrollTo(0, 0); }
+function setView(id, key) { ui.view[id] = key; render(); }
+function setShowMsgs(id, on) { ui.showMsgs[id] = !!on; render(); }
+function scrollMsgThreads() {
+  document.querySelectorAll(".msg-thread").forEach((el) => { el.scrollTop = el.scrollHeight; });
+}
+function setPhoto(id, i) { ui.view[id + ":p"] = i; render(); }
+function setAdjust(id, on) { ui.adjusting[id] = on; ui.errors[id] = ""; render(); if (on) setTimeout(() => { const t = $("ta-" + id); if (t) t.focus(); }, 30); }
+function setPickOne(id, on) { ui.pickOne[id] = !!on; render(); }
+function draft(id, v) { ui.drafts[id] = v; }
+function openOrder(id) { location.hash = "#order-" + encodeURIComponent(id); }
+function goBack() { location.hash = ""; }
+function zoom(src) { $("zoomimg").src = src; $("zoom").classList.remove("hide"); }
+function closeZoom() { $("zoom").classList.add("hide"); $("zoomimg").src = ""; }
+window.addEventListener("hashchange", () => { render(); if (!location.hash) window.scrollTo(0, 0); });
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") load(true); });
+setInterval(() => { if (document.visibilityState === "visible" && !(document.activeElement && document.activeElement.matches("textarea"))) load(true); }, 60000);
+
+// ---------------------------------------------------------------------------
+// Sample data for the preview only (drawn placeholders, not real buyers)
+// ---------------------------------------------------------------------------
+function family(label, opts = {}) {
+  const w = 400, hgt = opts.h || 500, hue = opts.hue || 30, photo = !!opts.photo, people = opts.people || 3;
+  const bg = photo ? `hsl(${hue},18%,78%)` : `hsl(${hue},55%,90%)`;
+  let shapes = "";
+  const xs = people === 2 ? [0.36, 0.64] : people === 4 ? [0.2, 0.4, 0.6, 0.8] : [0.28, 0.5, 0.72];
+  xs.forEach((x, i) => {
+    const kid = people >= 3 && i === Math.floor(xs.length / 2);
+    const r = kid ? w * 0.075 : w * 0.095, cy = hgt * (kid ? 0.5 : 0.42), cx = w * x;
+    const skin = photo ? `hsl(${25 + i * 4},35%,${62 + i * 3}%)` : `hsl(30,70%,${82 - i * 2}%)`;
+    const shirt = photo ? `hsl(${hue + i * 60},20%,${40 + i * 6}%)` : `hsl(${hue + i * 70},60%,58%)`;
+    const hair = opts.longHair && i === 0 ? `<path d="M${cx - r * 1.15},${cy} q0,-${r * 1.9} ${r * 1.15},-${r * 1.2} q${r * 1.15},-${r * 0.7} ${r * 1.15},${r * 1.2} v${r * 1.6} h-${r * 0.35} v-${r * 1.3} h-${r * 1.6} v${r * 1.3} h-${r * 0.35}z" fill="${photo ? "hsl(25,35%,25%)" : "hsl(25,60%,30%)"}"/>`
+      : `<path d="M${cx - r},${cy - r * 0.2} q0,-${r * 1.1} ${r},-${r * 1.1} q${r},0 ${r},${r * 1.1} q-${r},-${r * 0.6} -${r * 2},0z" fill="${photo ? "hsl(25,30%,22%)" : "hsl(" + (20 + i * 15) + ",55%,28%)"}"/>`;
+    shapes += `<rect x="${cx - r * 1.25}" y="${cy + r * 0.9}" width="${r * 2.5}" height="${hgt - cy}" rx="${r}" fill="${shirt}"/>`;
+    shapes += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${skin}"/>` + hair;
+    if (!photo) shapes += `<circle cx="${cx - r * 0.35}" cy="${cy}" r="${r * 0.11}" fill="#222"/><circle cx="${cx + r * 0.35}" cy="${cy}" r="${r * 0.11}" fill="#222"/><path d="M${cx - r * 0.35},${cy + r * 0.35} q${r * 0.35},${r * 0.3} ${r * 0.7},0" stroke="#222" stroke-width="${r * 0.08}" fill="none"/>`;
+    else shapes += `<circle cx="${cx - r * 0.33}" cy="${cy}" r="${r * 0.07}" fill="#333"/><circle cx="${cx + r * 0.33}" cy="${cy}" r="${r * 0.07}" fill="#333"/>`;
+  });
+  if (opts.dog) shapes += `<ellipse cx="${w * 0.82}" cy="${hgt * 0.84}" rx="${w * 0.09}" ry="${w * 0.06}" fill="${photo ? "hsl(35,25%,55%)" : "hsl(35,60%,70%)"}"/><circle cx="${w * 0.9}" cy="${hgt * 0.78}" r="${w * 0.05}" fill="${photo ? "hsl(35,25%,50%)" : "hsl(35,60%,66%)"}"/>${opts.stitches ? `<path d="M${w * 0.78},${hgt * 0.82} l${w * 0.06},0 M${w * 0.79},${hgt * 0.805} l0,${w * 0.03} M${w * 0.81},${hgt * 0.805} l0,${w * 0.03} M${w * 0.83},${hgt * 0.805} l0,${w * 0.03}" stroke="#222" stroke-width="2"/>` : ""}`;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${hgt}" viewBox="0 0 ${w} ${hgt}"><rect width="100%" height="100%" fill="${bg}"/>${opts.frame ? `<rect x="14" y="14" width="${w - 28}" height="${hgt - 28}" fill="none" stroke="#1f1d1a" stroke-width="14"/>` : ""}${shapes}
+    <rect x="0" y="${hgt - 34}" width="100%" height="34" fill="rgba(0,0,0,0.45)"/><text x="50%" y="${hgt - 12}" font-family="sans-serif" font-size="16" text-anchor="middle" fill="#fff">${label}</text></svg>`;
+  return "data:image/svg+xml;utf8," + encodeURIComponent(svg);
+}
+function demoData() {
+  const t = todayPT();
+  const add = (n) => { const d = new Date(t + "T12:00:00Z"); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
+  const ago = (days) => new Date(Date.now() - days * 86400000 - 3600000).toISOString();
+  const kPhoto = family("Sample buyer photo", { photo: true, hue: 200, people: 2, dog: true });
+  const mPhoto1 = family("Sample buyer photo 1", { photo: true, hue: 120, people: 3 });
+  const mPhoto2 = family("Sample buyer photo 2", { photo: true, hue: 40, people: 3, longHair: true });
+  const mV3 = family("Sample mockup v3", { hue: 210, people: 3 });
+  const mV4 = family("Sample mockup v4", { hue: 210, people: 3, longHair: true });
+  return {
+    decisions: [
+      { id: "d-old", order_id: "1000000001", review_key: "1000000001|art_proof|v3", kind: "art_proof", action: "approve", option: null, version: "v3", target_bot: "Messanger", decided_by: "Derek", decided_at: ago(3), webhook_status: "delivered", status: "done", last_note: "Sent proof to buyer", last_note_by: "Messanger" },
+    ],
+    orders: [
+      { order_id: "1000000001", buyer_first_name: "Sample Buyer A", product: "Charlie Brown 5x7 matte print", status: "Waiting for Derek", stage: "needs_ok", stage_since: ago(0),
+        latest_request: "Can you make mom's hair longer, past her shoulders?", next_step: "v4 sent to Derek", ship_by: add(4), artist_bot: "Designer",
+        review: { kind: "art_proof", version: "v4", artist_bot: "Designer", note: "Hair now past the shoulders, everything else the same as v3.",
+          options: [{ label: null, image: mV4 }], photos: [mPhoto1, mPhoto2] },
+        versions: [{ version: "v3", images: [{ label: "", image: mV3 }] }, { version: "v4", images: [{ label: "", image: mV4 }] }],
+        photos: [mPhoto1, mPhoto2],
+        messages: [
+          { from: "buyer", at: "Nov 18, 2:14 PM PT", text: "Hi! Could you make a Charlie Brown portrait of our family? I'll attach a few photos." },
+          { from: "shop", at: "Nov 18, 2:31 PM PT", text: "I'd love to. I'll send a first mockup as soon as it's ready." },
+          { from: "shop", at: "Nov 19, 10:02 AM PT", text: "Here's the first version — take a look and tell me what you'd like changed." },
+          { from: "buyer", at: "Nov 19, 4:20 PM PT", text: "This is so close! Can you make mom's hair longer, past her shoulders?" },
+          { from: "shop", at: "Nov 19, 4:41 PM PT", text: "Absolutely — I'll send a new version with longer hair and keep everything else the same." },
+          { from: "buyer", at: "Nov 20, 8:05 AM PT", text: "Thank you!! Can't wait to see it." }
+        ] },
+      { order_id: "1000000002", buyer_first_name: "Sample Buyer B", product: "Nightmare 5x7 matte print", status: "Waiting for Derek", stage: "needs_ok", stage_since: ago(1),
+        latest_request: "Couple with their dog, Nightmare style, dog with stitches", next_step: "v1 options sent to Derek", ship_by: add(5), artist_bot: "Designer 2",
+        review: { kind: "art_proof", version: "v1", artist_bot: "Designer 2", note: "B keeps the softer faces.",
+          options: [{ label: "A", image: family("Sample mockup A", { hue: 280, people: 2, dog: true, stitches: true }) }, { label: "B", image: family("Sample mockup B", { hue: 320, people: 2, dog: true, stitches: true }) }],
+          photos: [kPhoto] },
+        photos: [kPhoto] },
+      { order_id: "1000000003", buyer_first_name: "Sample Buyer C", product: "Charlie Brown 12x16 canvas", status: "Waiting for Derek", stage: "needs_ok", stage_since: ago(2), ship_by: add(2),
+        latest_request: "Buyer approved v2", next_step: "Derek to OK the Printify mockup", artist_bot: "Designer",
+        review: { kind: "printify_mockup", version: "pfy1", note: "12x16 canvas, black edge wrap.", options: [{ label: null, image: family("Sample Printify canvas mockup", { hue: 30, people: 4, frame: true, h: 420 }) }] },
+        etsy_net: 67.05, printify_cost: 50.78 },
+      { order_id: "1000000004", buyer_first_name: "Sample Buyer D", product: "Charlie Brown 5x7 matte print", status: "In production", stage: "printing", stage_since: ago(1),
+        latest_request: "Approved v8c", next_step: "Watch for tracking.", ship_by: add(2), printify_order_id: "10000000.01", printify_est_ship: add(4) },
+      { order_id: "1000000005", buyer_first_name: "Sample Buyer E", product: "Pet Christmas 11x14 poster", status: "Needs mockup", stage: "artist", stage_since: ago(0), ship_by: add(8),
+        latest_request: "Two dogs, wants the red scarf", next_step: "WORKING NOW: Designer 3 v1 mockup", artist_bot: "Designer 3" },
+      { order_id: "1000000006", buyer_first_name: "Sample Buyer F", product: "Buddy the Elf 8x10 framed", status: "Waiting on buyer", stage: "waiting_buyer", stage_since: ago(3), ship_by: add(6) },
+      { order_id: "1000000007", buyer_first_name: "Sample Buyer G", product: "Nightmare 8x10 poster", status: "Waiting on buyer", stage: "waiting_buyer", stage_since: ago(0), ship_by: add(9) },
+      { order_id: "1000000008", buyer_first_name: "Sample Buyer H", product: "Nightmare 12x16 canvas", status: "Approved - ordering", stage: "ordering", stage_since: ago(0), ship_by: add(7) },
+      { order_id: "1000000009", buyer_first_name: "Sample Buyer I", product: "Charlie Brown 5x7 matte print", status: "Shipped", stage: "shipped", stage_since: ago(2), ship_by: add(-3),
+        tracking_carrier: "DHL", tracking_number: "REDACTED", tracking_note: "on the way" },
+      { order_id: "1000000010", buyer_first_name: "Sample Buyer J", product: "Pet Christmas 5x7 print", status: "Delivered", stage: "delivered", stage_since: ago(4) },
+      { order_id: "1000000011", buyer_first_name: "Sample Buyer K", product: "Charlie Brown 16x20 canvas", status: "Delivered", stage: "delivered", stage_since: ago(6) },
+    ],
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Start
+// ---------------------------------------------------------------------------
+const FORCE_DEMO = false; // true only in the shareable preview copy
+
+async function start() {
+  const params = new URLSearchParams(location.search);
+  if (FORCE_DEMO || params.has("demo")) { DEMO = true; STATE = demoData(); render(); return; }
+  try {
+    const res = await fetch("/api/me", { credentials: "same-origin" });
+    if (res.status === 401) { showLogin(); return; }
+    if (!res.ok) throw new Error("server");
+    await load();
+  } catch (e) {
+    $("app").innerHTML = `<div class="login"><h1>Viva Orders</h1><p class="muted">Can't reach the app right now. Check your connection.</p>
+      <button class="big go" onclick="start()">Try again</button></div>`;
+  }
+}
+start();
+</script>
+</body>
+</html>

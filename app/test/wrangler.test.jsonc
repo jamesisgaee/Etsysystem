@@ -1,0 +1,11 @@
+// LOCAL TESTS ONLY (fake ids, fake secrets in test/.dev.vars). Never deploy with this file.
+{
+  "name": "viva-orders-localtest",
+  "main": "../src/worker.js",
+  "compatibility_date": "2026-11-01",
+  "triggers": { "crons": ["*/10 * * * *"] },
+  "vars": { "ESCALATE_TO_BOT": "Messanger" },
+  "assets": { "directory": "../public", "binding": "ASSETS", "run_worker_first": true },
+  "d1_databases": [{ "binding": "DB", "database_name": "viva-orders-localtest", "database_id": "00000000-0000-0000-0000-000000000000" }],
+  "kv_namespaces": [{ "binding": "IMAGES", "id": "00000000000000000000000000000000" }]
+}

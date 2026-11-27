@@ -1,0 +1,12 @@
+{
+  "name": "viva-orders",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "setup-db": "wrangler d1 execute viva-orders --remote --file=schema.sql"
+  },
+  "devDependencies": {
+    "wrangler": "^4"
+  }
+}

@@ -1,0 +1,34 @@
+{
+  // VivaMemoirStudio order app. See README.md for setup.
+  "name": "viva-orders",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-11-01",
+  "workers_dev": true,
+  // Delivery guarantee: every 10 minutes the Worker re-wakes a bot for any of Derek's decisions that
+  // nobody picked up or finished (see src/plan.js). Costs no bot usage unless something is overdue.
+  "triggers": { "crons": ["*/10 * * * *"] },
+  // Who gets told when re-waking an artist didn't work (they hand the job to a backup artist).
+  "vars": { "ESCALATE_TO_BOT": "Messanger" },
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "run_worker_first": true
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "viva-orders",
+      // Paste the database_id that "wrangler d1 create viva-orders" prints:
+      "database_id": "26943d37-f324-4d20-ba5e-aec51ed9e3fe"
+    }
+  ],
+  "kv_namespaces": [
+    // Images live in Workers KV (free, no card). Paste the id that "wrangler kv namespace create viva-images" prints:
+    { "binding": "IMAGES", "id": "bd79d2455d574aca9070a9b851e365f2" }
+  ]
+  // Secrets (set with "npx wrangler secret put NAME", never written here):
+  //   APP_PASSWORD    your login password
+  //   SESSION_SECRET  long random text, signs your login cookie
+  //   BOT_TOKEN       long random text the bots use for push/ack
+  //   BOT_WEBHOOKS    JSON with each bot's Grok Bot webhook URL + key
+}

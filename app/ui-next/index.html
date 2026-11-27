@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Viva Orders">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#f6f4f0">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-180.png">
+<title>Viva Orders</title>
+<style>
+  :root {
+    --bg: #f6f4f0; --card: #ffffff; --ink: #1f1d1a; --ink2: #6b665e; --ink3: #9a948a;
+    --line: #e7e2d9; --soft: #f1ede6;
+    --blue: #2f6fdb; --blue-bg: #e8f0fd;
+    --green: #1f7a4d; --green-bg: #e4f4ea;
+    --amber: #8a5a00; --amber-bg: #fdf1d6;
+    --red: #b42318; --red-bg: #fdecea;
+    --btn: #1f1d1a; --btn-ink: #ffffff;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141312; --card: #1f1e1c; --ink: #f2efe9; --ink2: #b0aa9f; --ink3: #7d776d;
+      --line: #33302c; --soft: #2a2825;
+      --blue: #8db4f7; --blue-bg: #1d2a40; --green: #6fd39c; --green-bg: #173323;
+      --amber: #f2c35b; --amber-bg: #3a2d10; --red: #ff8a80; --red-bg: #3d1a17;
+      --btn: #f2efe9; --btn-ink: #141312;
+    }
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink); }
+  body { font-size: 16px; line-height: 1.45; }
+  button { font: inherit; color: inherit; cursor: pointer; }
+  .wrap { max-width: 640px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 12px) 14px calc(env(safe-area-inset-bottom) + 40px); }
+  .hide { display: none !important; }
+  .muted { color: var(--ink2); }
+  .small { font-size: 13px; }
+
+  /* top */
+  .top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  h1 { font-size: 28px; font-weight: 750; margin: 0; letter-spacing: -0.01em; }
+  .refresh { background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 7px 14px; font-size: 14px; font-weight: 600; color: var(--ink2); }
+  .fresh { font-size: 14px; color: var(--ink2); margin: 2px 2px 10px; }
+  .fresh .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--green); margin-right: 6px; vertical-align: 1px; }
+  .fresh.stale .dot { background: var(--amber); }
+
+  /* banners */
+  .banner { border-radius: 14px; padding: 12px 14px; margin: 0 0 10px; font-size: 15px; font-weight: 600; }
+  .banner .b2 { display: block; font-weight: 400; font-size: 14px; margin-top: 2px; }
+  .banner.red { background: var(--red-bg); color: var(--red); }
+  .banner.amber { background: var(--amber-bg); color: var(--amber); }
+  .banner button { margin-top: 8px; background: var(--red); color: #fff; border: none; border-radius: 10px; padding: 9px 16px; font-weight: 700; font-size: 15px; }
+
+  /* sections */
+  .sect { display: flex; align-items: baseline; gap: 8px; font-size: 20px; font-weight: 750; margin: 22px 2px 10px; }
+  .sect .n { font-size: 15px; font-weight: 700; color: var(--ink3); }
+  .sect.needs .n { background: var(--red); color: #fff; border-radius: 999px; padding: 1px 9px; }
+  .allgood { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 16px; color: var(--ink2); font-size: 15px; }
+  .allgood b { color: var(--green); }
+
+  /* needs-you card */
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; margin-bottom: 16px; }
+  .card-hd { padding: 14px 16px 10px; }
+  .who { font-size: 22px; font-weight: 750; }
+  .what { color: var(--ink2); font-size: 15px; }
+  .kind { display: inline-block; font-size: 13px; font-weight: 650; padding: 4px 10px; border-radius: 999px; margin-top: 8px; background: var(--blue-bg); color: var(--blue); }
+  .kind.final { background: var(--green-bg); color: var(--green); }
+  .kind.redo { background: var(--amber-bg); color: var(--amber); }
+  .ask { margin: 0 16px 10px; border-left: 4px solid var(--amber); background: var(--amber-bg); border-radius: 0 12px 12px 0; padding: 9px 12px; }
+  .ask .lbl { font-size: 12px; font-weight: 700; color: var(--amber); text-transform: uppercase; letter-spacing: 0.04em; }
+  .ask .txt { font-size: 16px; margin-top: 2px; }
+  .flag { margin: 0 16px 10px; padding: 8px 12px; border-radius: 12px; font-size: 14px; font-weight: 600; }
+  .flag.red { background: var(--red-bg); color: var(--red); }
+  .flag.amber { background: var(--amber-bg); color: var(--amber); }
+  .mock { position: relative; background: var(--soft); border-top: 1px solid var(--line); }
+  .mock img { width: 100%; max-height: 70vh; object-fit: contain; display: block; }
+  .mock .tag { position: absolute; left: 10px; top: 10px; background: rgba(0,0,0,0.65); color: #fff; font-size: 13px; font-weight: 650; padding: 4px 10px; border-radius: 999px; }
+  .mock .zh { position: absolute; right: 10px; bottom: 10px; background: rgba(0,0,0,0.5); color: #fff; font-size: 12px; padding: 3px 9px; border-radius: 999px; }
+  .nomock { padding: 26px 18px; text-align: center; color: var(--ink2); background: var(--soft); border-top: 1px solid var(--line); }
+  .blk { padding: 12px 16px 0; }
+  .lbl2 { font-size: 12px; font-weight: 700; color: var(--ink3); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px; }
+  .strip { display: flex; gap: 6px; overflow-x: auto; }
+  .strip img { width: 58px; height: 58px; object-fit: cover; border-radius: 9px; flex: 0 0 auto; background: var(--soft); cursor: zoom-in; }
+  .note { font-size: 14px; color: var(--ink2); background: var(--soft); border-radius: 12px; padding: 8px 11px; }
+  .note.clamp { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+
+  /* messages */
+  .msgs { display: flex; flex-direction: column; gap: 7px; }
+  .msg { max-width: 90%; }
+  .msg.buyer { align-self: flex-start; }
+  .msg.shop { align-self: flex-end; }
+  .msg .mw { font-size: 12px; font-weight: 700; padding: 0 3px 2px; }
+  .msg.buyer .mw { color: var(--amber); }
+  .msg.shop .mw { color: var(--blue); text-align: right; }
+  .msg .at { font-weight: 500; color: var(--ink3); }
+  .msg .tx { background: var(--soft); border-radius: 14px; padding: 8px 11px; font-size: 15px; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .msg.shop .tx { background: var(--blue-bg); }
+  .msg .tx.clamp { display: -webkit-box; -webkit-line-clamp: 6; -webkit-box-orient: vertical; overflow: hidden; cursor: pointer; }
+  .msg img { width: 100%; max-height: 180px; object-fit: cover; border-radius: 10px; border: 1px solid var(--line); cursor: zoom-in; }
+  .linkbtn { background: none; border: none; color: var(--blue); font-weight: 600; font-size: 14px; padding: 8px 0 0; }
+
+  /* buttons */
+  .acts { padding: 14px 16px 16px; }
+  .big { width: 100%; min-height: 56px; border-radius: 14px; font-size: 18px; font-weight: 750; border: none; }
+  .go { background: var(--btn); color: var(--btn-ink); margin-bottom: 8px; }
+  .alt { background: var(--card); border: 1.5px solid var(--line); }
+  .big:active { transform: scale(0.985); }
+  .big[disabled] { opacity: 0.55; }
+  .explain { text-align: center; color: var(--ink2); font-size: 13px; margin-top: 8px; }
+  textarea { width: 100%; font: inherit; font-size: 17px; border: 1.5px solid var(--line); border-radius: 12px; padding: 12px; background: var(--card); color: var(--ink); resize: vertical; min-height: 110px; margin-bottom: 8px; }
+  .err { color: var(--red); font-size: 14px; margin: 4px 0 8px; font-weight: 600; }
+  .cancel { background: none; border: none; color: var(--ink2); padding: 10px; width: 100%; font-size: 15px; }
+  .status { border-radius: 14px; padding: 13px 14px; font-size: 16px; font-weight: 650; }
+  .status .s2 { display: block; font-size: 14px; font-weight: 400; margin-top: 3px; }
+  .status.ok { background: var(--green-bg); color: var(--green); }
+  .status.wait { background: var(--blue-bg); color: var(--blue); }
+  .status.bad { background: var(--red-bg); color: var(--red); }
+  .status button { margin-top: 10px; background: var(--red); color: #fff; border: none; border-radius: 10px; padding: 9px 16px; font-weight: 700; }
+
+  /* rows */
+  .list { background: var(--card); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
+  .row { display: flex; align-items: center; gap: 10px; width: 100%; padding: 12px 14px; border: none; border-top: 1px solid var(--line); background: none; text-align: left; }
+  .row:first-child { border-top: none; }
+  .row:active { background: var(--soft); }
+  .row .l { flex: 1; min-width: 0; }
+  .row .nm { font-weight: 700; font-size: 16px; }
+  .row .st { font-size: 14px; color: var(--ink2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .row .st.red { color: var(--red); font-weight: 650; }
+  .row .st.amber { color: var(--amber); font-weight: 650; }
+  .row .r { flex: 0 0 auto; font-size: 13px; color: var(--ink3); text-align: right; max-width: 34%; }
+  .row .chev { color: var(--ink3); font-size: 18px; }
+  .fold { width: 100%; background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px; text-align: left; font-size: 16px; font-weight: 650; display: flex; justify-content: space-between; }
+  .track { color: var(--blue); font-weight: 650; text-decoration: none; }
+
+  /* detail */
+  .back { background: none; border: none; color: var(--blue); font-size: 17px; padding: 6px 0 10px; }
+  .facts { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 2px 14px; margin-top: 12px; }
+  .fact { padding: 10px 0; border-top: 1px solid var(--line); font-size: 15px; }
+  .fact:first-child { border-top: none; }
+  .fact .k { color: var(--ink3); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; display: block; }
+  .h2 { font-size: 18px; font-weight: 750; margin: 22px 2px 8px; }
+  .panel { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 12px 14px; }
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .grid img { width: 100%; aspect-ratio: 4/5; object-fit: cover; border-radius: 9px; background: var(--soft); cursor: zoom-in; }
+  .bigpill { display: inline-block; font-size: 14px; font-weight: 650; padding: 5px 11px; border-radius: 999px; background: var(--soft); color: var(--ink2); margin-top: 6px; }
+  .bigpill.red { background: var(--red-bg); color: var(--red); }
+  .bigpill.green { background: var(--green-bg); color: var(--green); }
+
+  /* login / misc */
+  .login { max-width: 360px; margin: 18vh auto 0; padding: 0 20px; text-align: center; }
+  .login input { width: 100%; font-size: 18px; padding: 14px; border-radius: 14px; border: 1.5px solid var(--line); background: var(--card); color: var(--ink); margin: 18px 0 10px; }
+  .zoom { position: fixed; inset: 0; background: rgba(0,0,0,0.94); z-index: 50; display: flex; align-items: center; justify-content: center; overflow: auto; }
+  .zoom img { max-width: 100vw; max-height: 100vh; object-fit: contain; }
+  .zoom .x { position: fixed; top: calc(env(safe-area-inset-top) + 10px); right: 14px; background: rgba(255,255,255,0.2); color: #fff; border: none; border-radius: 999px; width: 44px; height: 44px; font-size: 24px; }
+  .demo { background: var(--amber-bg); color: var(--amber); font-size: 13px; text-align: center; padding: 6px 10px; border-radius: 10px; margin-bottom: 8px; }
+  .toast { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom) + 24px); transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 12px; font-size: 15px; z-index: 60; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="zoom" class="zoom hide" onclick="closeZoom()"><button class="x" aria-label="Close">×</button><img id="zoomimg" alt=""></div>
+<div id="toast" class="toast hide"></div>
+<script>
+"use strict";
+// Viva Orders: one simple screen. Needs you / In progress / Done.
+// Uses the same API as before: GET /api/state, POST /api/decisions, POST /api/decisions/:id/retry.
+const STALE_HOURS = 6;          // no bot update for this long -> amber banner
+const NO_PICKUP_MIN = 30;       // your decision not picked up by a bot for this long -> red banner
+const SENDING_STUCK_MIN = 2;    // "sending" this long means it never got through
+const PROFIT_GOAL = 0.20;
+
+let STATE = { orders: [], decisions: [], health: null, now: null };
+let DEMO = false;
+let LOADED_AT = 0, LOAD_FAILED = false;
+const ui = { adjusting: {}, drafts: {}, errors: {}, busy: {}, allMsgs: {}, noteOpen: {}, showDone: false };
+
+const $ = (id) => document.getElementById(id);
+function esc(s) {
+  return String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+function imgUrl(key) { if (!key) return ""; if (DEMO || /^data:/.test(key)) return key; return "/img/" + encodeURIComponent(key); }
+function todayPT() { return new Intl.DateTimeFormat("en-CA", { timeZone: "America/Los_Angeles" }).format(new Date()); }
+function dayDiff(a, b) { return Math.round((Date.parse(b + "T00:00:00Z") - Date.parse(a + "T00:00:00Z")) / 86400000); }
+function isDate(s) { return typeof s === "string" && /^\d{4}-\d{2}-\d{2}$/.test(s); }
+function niceDate(s) { if (!isDate(s)) return s || "not set"; return new Date(s + "T12:00:00Z").toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" }); }
+function ago(iso) {
+  if (!iso) return "never";
+  const m = Math.max(0, Math.round((Date.now() - Date.parse(iso)) / 60000));
+  if (m < 1) return "just now";
+  if (m < 60) return m + " min ago";
+  const h = Math.round(m / 60);
+  if (h < 36) return h + (h === 1 ? " hour ago" : " hours ago");
+  const d = Math.round(h / 24); return d + " days ago";
+}
+function minsSince(iso) { return iso ? (Date.now() - Date.parse(iso)) / 60000 : Infinity; }
+function ptTime(iso) { return new Date(iso).toLocaleString("en-US", { timeZone: "America/Los_Angeles", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) + " PT"; }
+function money(n) { return "$" + Number(n).toFixed(2); }
+function toast(msg) { const t = $("toast"); t.textContent = msg; t.classList.remove("hide"); clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.add("hide"), 2600); }
+function firstName(o) { return o.buyer_first_name || "the buyer"; }
+
+function trackingUrl(carrier, number) {
+  if (!number) return null;
+  const n = String(number).replace(/\s+/g, "");
+  let c = String(carrier || "").toUpperCase();
+  if (!c) {
+    if (/^1Z[0-9A-Z]{16}$/i.test(n)) c = "UPS";
+    else if (/^(94|93|92|95|82)\d{18,20}$/.test(n) || /^420\d{5,9}9\d{21}$/.test(n)) c = "USPS";
+    else if (/^\d{12}$|^\d{15}$/.test(n)) c = "FEDEX";
+    else if (/^\d{10}$/.test(n)) c = "DHL";
+  }
+  const e = encodeURIComponent(n);
+  if (c.includes("UPS")) return "https://www.ups.com/track?tracknum=" + e;
+  if (c.includes("USPS")) return "https://tools.usps.com/go/TrackConfirmAction?tLabels=" + e;
+  if (c.includes("FEDEX")) return "https://www.fedex.com/fedextrack/?trknbr=" + e;
+  if (c.includes("DHL")) return "https://www.dhl.com/us-en/home/tracking.html?tracking-id=" + e;
+  return "https://www.google.com/search?q=" + encodeURIComponent((carrier || "") + " tracking " + n);
+}
+
+// ---------------------------------------------------------------------------
+// Plain-language status: what's happening, and who it's waiting on
+// ---------------------------------------------------------------------------
+function plain(o) {
+  const est = isDate(o.printify_est_ship) ? " · ships about " + niceDate(o.printify_est_ship) : "";
+  switch (o.stage) {
+    case "problem":       return { text: "Something's wrong — tap to see", who: "", tone: "red" };
+    case "needs_ok":      return { text: "Waiting for your OK", who: "You", tone: "red" };
+    case "artist":        return { text: "Design is being made", who: o.artist_bot || "Designer", tone: "" };
+    case "waiting_buyer": return { text: "Proof sent — waiting for " + firstName(o), who: "Buyer", tone: "" };
+    case "ordering":      return { text: "Approved — placing the print order", who: "Shop", tone: "" };
+    case "printing":      return { text: "Being printed" + est, who: "Printer", tone: "" };
+    case "shipped":       return { text: "On the way", who: "Carrier", tone: "" };
+    case "delivered":     return { text: "Delivered", who: "", tone: "" };
+    default:              return { text: o.status || "Unknown", who: "", tone: "" };
+  }
+}
+
+// Date problems worth a red / amber word
+function flagFor(o) {
+  const today = todayPT();
+  const notShipped = !["shipped", "delivered"].includes(o.stage);
+  if (!notShipped) return null;
+  if (isDate(o.ship_by) && o.ship_by < today) return { level: "red", text: "Past ship-by date (" + niceDate(o.ship_by) + ")" };
+  if (isDate(o.ship_by) && o.ship_by === today) return { level: "red", text: "Must ship today" };
+  if (isDate(o.ship_by) && isDate(o.printify_est_ship) && o.printify_est_ship > o.ship_by)
+    return { level: "amber", text: "Printer ships " + niceDate(o.printify_est_ship) + ", after ship-by " + niceDate(o.ship_by) };
+  if (isDate(o.ship_by) && !o.tracking_number && dayDiff(today, o.ship_by) <= 2 && ["artist", "waiting_buyer", "needs_ok"].includes(o.stage))
+    return { level: "amber", text: "Ship-by " + niceDate(o.ship_by) + " and the design isn't final yet" };
+  return null;
+}
+
+// ---------------------------------------------------------------------------
+// Decisions
+// ---------------------------------------------------------------------------
+function reviewKey(o) { return `${o.order_id}|${o.review.kind}|${o.review.version || ""}`; }
+function decisionFor(o) {
+  if (!o.review || !o.review.kind) return null;
+  const k = reviewKey(o);
+  return STATE.decisions.find((d) => d.review_key === k) || null;
+}
+// "failed" | "sending" | "waiting_pickup" | "picked_up" | "done"
+function deliveryState(d) {
+  if (d.status === "done") return "done";
+  if (d.delivery_state === "stuck") return "stuck"; // server re-woke the bot several times; nothing happened
+  if (d.webhook_status === "failed") return "failed";
+  if (d.webhook_status === "sending") return minsSince(d.decided_at) > SENDING_STUCK_MIN ? "failed" : "sending";
+  if (d.last_note_at) return "picked_up";
+  return "waiting_pickup";
+}
+function orderName(id) { const o = STATE.orders.find((x) => x.order_id === id); return o ? firstName(o) : "an order"; }
+
+// What could make Derek doubt the board
+function trustProblems() {
+  const out = [];
+  const recent = STATE.decisions.filter((d) => minsSince(d.decided_at) < 7 * 24 * 60);
+  for (const d of recent) {
+    const s = deliveryState(d);
+    if (s === "stuck") out.push({ level: "red", text: `${d.target_bot} hasn't finished your ${d.action === "approve" ? "OK" : "change request"} for ${orderName(d.order_id)}.`, sub: `The app reminded them ${Number(d.auto_wakes) || 0}×. Tap Resend, or tell Manager.`, retry: d.id, force: true });
+    if (s === "failed") out.push({ level: "red", text: `Your ${d.action === "approve" ? "OK" : "change request"} for ${orderName(d.order_id)} didn't reach the team.`, sub: "It's saved. Tap Resend.", retry: d.id });
+    else if (s === "waiting_pickup" && minsSince(d.decided_at) > NO_PICKUP_MIN)
+      out.push({ level: "red", text: `Nobody has picked up your ${d.action === "approve" ? "OK" : "change request"} for ${orderName(d.order_id)} yet.`, sub: `Sent ${ago(d.decided_at)}. Tap Resend, or tell Manager.`, retry: d.id, force: true });
+  }
+  const lp = lastPushAt();
+  if (!DEMO && lp && minsSince(lp) > STALE_HOURS * 60)
+    out.push({ level: "amber", text: `The team hasn't updated this board in ${ago(lp).replace(" ago", "")}.`, sub: "Recent changes may be missing. If that seems wrong, tell Manager." });
+  if (LOAD_FAILED) out.push({ level: "red", text: "Can't reach the app right now.", sub: "What you see may be old. Check your connection and tap Refresh." });
+  return out;
+}
+function lastPushAt() {
+  const h = STATE.health && STATE.health.last_push && STATE.health.last_push.at;
+  let best = h || null;
+  for (const o of STATE.orders) if (o.pushed_at && (!best || o.pushed_at > best)) best = o.pushed_at;
+  return best;
+}
+
+// ---------------------------------------------------------------------------
+// Server
+// ---------------------------------------------------------------------------
+async function api(path, opts = {}) {
+  const res = await fetch(path, {
+    method: opts.method || "GET",
+    headers: { "Content-Type": "application/json", "x-viva": "1" },
+    body: opts.body ? JSON.stringify(opts.body) : undefined,
+    credentials: "same-origin",
+  });
+  let data = null;
+  try { data = await res.json(); } catch (e) {}
+  if (res.status === 401 && path !== "/api/login") { showLogin(); throw new Error("login"); }
+  if (!res.ok) { const err = new Error((data && data.error) || "Something went wrong. Try again."); err.data = data; err.status = res.status; throw err; }
+  return data;
+}
+async function load(quiet) {
+  if (DEMO) { render(); return; }
+  try { STATE = await api("/api/state"); LOADED_AT = Date.now(); LOAD_FAILED = false; render(); if (!quiet) toast("Up to date"); }
+  catch (e) { if (e.message !== "login") { LOAD_FAILED = true; render(); } }
+}
+async function decide(orderId, action) {
+  const o = STATE.orders.find((x) => x.order_id === orderId);
+  if (!o || !o.review) return;
+  const opts = o.review.options || [];
+  const option = action === "approve" ? (opts.length === 1 ? (opts[0].label || "all") : "all") : null;
+  const text = (ui.drafts[orderId] || "").trim();
+  ui.errors[orderId] = "";
+  if (action === "adjust" && !text) { ui.errors[orderId] = "Type what should change first."; render(); return; }
+  ui.busy[orderId] = action; render();
+  try {
+    if (DEMO) {
+      await new Promise((r) => setTimeout(r, 400));
+      STATE.decisions.unshift({ id: "demo-" + Date.now(), order_id: orderId, review_key: reviewKey(o), kind: o.review.kind, action, option,
+        version: o.review.version, adjust_text: action === "adjust" ? text : null, target_bot: "Messanger", decided_by: "Derek",
+        decided_at: new Date().toISOString(), webhook_status: "delivered", status: "pending" });
+    } else {
+      const r = await api("/api/decisions", { method: "POST", body: { order_id: orderId, review_key: reviewKey(o), action, option, adjust_text: action === "adjust" ? text : null } });
+      STATE.decisions.unshift(r.decision);
+    }
+    ui.adjusting[orderId] = false; ui.drafts[orderId] = "";
+  } catch (e) {
+    if (e.data && e.data.decision) STATE.decisions.unshift(e.data.decision);
+    else if (e.message !== "login") ui.errors[orderId] = e.message;
+    if (e.status === 409 && !(e.data && e.data.decision)) load(true);
+  }
+  ui.busy[orderId] = null; render();
+}
+async function retry(id, force) {
+  try {
+    if (DEMO) return;
+    const r = await api(`/api/decisions/${id}/retry${force ? "?force=1" : ""}`, { method: "POST" });
+    const i = STATE.decisions.findIndex((d) => d.id === id);
+    if (i >= 0) STATE.decisions[i] = r.decision;
+    if (force) r.decision._resent_at = Date.now();
+    render(); toast(r.decision.webhook_status === "delivered" ? "Sent again ✓" : "Still didn't go through. Tell Manager.");
+  } catch (e) { if (e.message !== "login") toast(e.message); }
+}
+
+// ---------------------------------------------------------------------------
+// Login
+// ---------------------------------------------------------------------------
+function showLogin(msg) {
+  $("app").innerHTML = `<div class="login"><h1>Viva Orders</h1><p class="muted">Enter your password</p>
+    <form onsubmit="doLogin(event)"><input id="pw" type="password" autocomplete="current-password" placeholder="Password" autofocus>
+    ${msg ? `<div class="err">${esc(msg)}</div>` : ""}<button class="big go" type="submit">Log in</button></form>
+    <p class="small muted">You stay logged in on this phone for about 4 months.</p></div>`;
+}
+async function doLogin(ev) {
+  ev.preventDefault();
+  const pw = $("pw").value;
+  if (!pw) { showLogin("Type your password first."); return; }
+  try { await api("/api/login", { method: "POST", body: { password: pw } }); await load(true); }
+  catch (e) { showLogin(e.message); }
+}
+
+// ---------------------------------------------------------------------------
+// Home: Needs you / In progress / Done
+// ---------------------------------------------------------------------------
+const PROGRESS_STAGES = ["problem", "needs_ok", "artist", "waiting_buyer", "ordering", "printing"];
+const PROGRESS_RANK = { problem: 0, needs_ok: 1, ordering: 2, artist: 3, waiting_buyer: 4, printing: 5 };
+
+function needsYou() {
+  // Cards Derek must act on: waiting for his OK and not decided yet.
+  return STATE.orders.filter((o) => o.stage === "needs_ok" && o.review && !decisionFor(o))
+    .sort((a, b) => (a.ship_by || "9").localeCompare(b.ship_by || "9"));
+}
+
+function render() {
+  const m = location.hash.match(/^#order-(.+)$/);
+  if (m) return renderDetail(decodeURIComponent(m[1]));
+  renderHome();
+}
+
+function renderHome() {
+  const needs = needsYou();
+  const needIds = new Set(needs.map((o) => o.order_id));
+  const progress = STATE.orders.filter((o) => PROGRESS_STAGES.includes(o.stage) && !needIds.has(o.order_id));
+  const rank = (o) => (flagFor(o) && flagFor(o).level === "red" ? -1 : 0) * 10 + PROGRESS_RANK[o.stage];
+  progress.sort((a, b) => rank(a) - rank(b) || (a.ship_by || "9").localeCompare(b.ship_by || "9"));
+  const done = STATE.orders.filter((o) => o.stage === "shipped" || o.stage === "delivered")
+    .sort((a, b) => (a.stage === "shipped" ? 0 : 1) - (b.stage === "shipped" ? 0 : 1));
+
+  const probs = trustProblems();
+  const lp = lastPushAt();
+  const stale = probs.some((p) => p.level === "amber");
+  let h = `<div class="wrap">`;
+  if (DEMO) h += `<div class="demo">Preview with sample orders. Nothing is sent.</div>`;
+  h += `<div class="top"><h1>Orders</h1><button class="refresh" onclick="load()">↻ Refresh</button></div>`;
+  h += `<div class="fresh ${stale ? "stale" : ""}"><span class="dot"></span>Team last updated ${esc(ago(lp))}${LOADED_AT ? ` · checked ${esc(ago(new Date(LOADED_AT).toISOString()))}` : ""}</div>`;
+  for (const p of probs) {
+    h += `<div class="banner ${p.level}">${esc(p.text)}<span class="b2">${esc(p.sub || "")}</span>${p.retry ? `<button onclick="retry('${esc(p.retry)}', ${p.force ? "true" : "false"})">Resend</button>` : ""}</div>`;
+  }
+
+  // Needs you
+  h += `<div class="sect needs">Needs you ${needs.length ? `<span class="n">${needs.length}</span>` : ""}</div>`;
+  if (!needs.length) h += `<div class="allgood"><b>✓ Nothing needs you right now.</b><br>New designs show up here when they're ready for your OK.</div>`;
+  for (const o of needs) h += renderNeedsCard(o);
+
+  // Decided recently, still on its way (so a tap doesn't just vanish)
+  const justDecided = STATE.orders.filter((o) => o.stage === "needs_ok" && o.review && decisionFor(o));
+  if (justDecided.length) h += `<div class="lbl2" style="margin:14px 4px 8px">You just decided</div>`;
+  for (const o of justDecided) h += renderDecidedCard(o);
+
+  // In progress
+  h += `<div class="sect">In progress <span class="n">${progress.length}</span></div>`;
+  if (!progress.length) h += `<div class="allgood">Nothing in progress.</div>`;
+  else h += `<div class="list">${progress.map(rowHtml).join("")}</div>`;
+
+  // Done
+  h += `<div class="sect">Done <span class="n">${done.length}</span></div>`;
+  h += `<button class="fold" onclick="ui.showDone=!ui.showDone;render()"><span>${done.filter((o) => o.stage === "shipped").length} on the way · ${done.filter((o) => o.stage === "delivered").length} delivered</span><span>${ui.showDone ? "▾" : "▸"}</span></button>`;
+  if (ui.showDone && done.length) h += `<div class="list" style="margin-top:8px">${done.map(rowHtml).join("")}</div>`;
+
+  h += `<div class="small muted" style="text-align:center;margin-top:26px">${(STATE.health && STATE.health.bots_connected) ? esc(STATE.health.bots_connected.length) + " of 5 team bots connected" : ""}</div>`;
+  h += `</div>`;
+  $("app").innerHTML = h;
+}
+
+function rowHtml(o) {
+  const p = plain(o), f = flagFor(o);
+  let line = esc(p.text), cls = p.tone;
+  if (f) { line = esc(f.text); cls = f.level; }
+  let right = esc(p.who);
+  if (o.stage === "shipped" && o.tracking_number) right = `<a class="track" href="${esc(trackingUrl(o.tracking_carrier, o.tracking_number))}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Track ↗</a>`;
+  return `<button class="row" onclick="openOrder('${esc(o.order_id)}')"><span class="l">
+    <div class="nm">${esc(o.buyer_first_name || "Buyer")} <span class="small muted" style="font-weight:500">· ${esc(shortProduct(o.product))}</span></div>
+    <div class="st ${cls}">${cls === "red" ? "● " : ""}${line}</div></span><span class="r">${right}</span><span class="chev">›</span></button>`;
+}
+function shortProduct(p) { p = String(p || ""); return p.length > 34 ? p.slice(0, 32) + "…" : p; }
+
+// ---------------------------------------------------------------------------
+// Needs-you card
+// ---------------------------------------------------------------------------
+function renderNeedsCard(o) {
+  const id = o.order_id, r = o.review || {};
+  const isPfy = r.kind === "printify_mockup";
+  const opts = Array.isArray(r.options) ? r.options : [];
+  const photos = (Array.isArray(r.photos) && r.photos.length ? r.photos : o.photos) || [];
+  const redo = !isPfy && (Number(r.round) > 1 || r.buyer_feedback);
+  let h = `<div class="card"><div class="card-hd"><div class="who">${esc(o.buyer_first_name || "Buyer")}</div>
+    <div class="what">${esc(o.product || "")}${isDate(o.ship_by) ? " · ship by " + niceDate(o.ship_by) : ""}</div>
+    <span class="kind ${isPfy ? "final" : redo ? "redo" : ""}">${isPfy ? "Final check before ordering the print" : redo ? "New version after the buyer's changes" : "New design to approve"}</span></div>`;
+  const f = flagFor(o);
+  if (f) h += `<div class="flag ${f.level}">${esc(f.text)}</div>`;
+  if (redo && r.buyer_feedback) h += `<div class="ask"><div class="lbl">${esc(firstName(o))} asked for</div><div class="txt">${esc(r.buyer_feedback)}</div></div>`;
+
+  // Big mockups, one under the other. No tabs, nothing to pick.
+  if (!opts.length) h += `<div class="nomock">The design picture is missing, so there's nothing to approve yet.<br>Use “Request changes” to ask for it.</div>`;
+  opts.forEach((op) => {
+    const label = isPfy ? "Print mockup" : (opts.length > 1 ? (op.label && op.label.length > 1 ? op.label : "Option " + (op.label || "")) : "Design");
+    h += `<div class="mock"><img src="${esc(imgUrl(op.image))}" alt="${esc(label)}" loading="lazy" onclick="zoom(this.src)"><span class="tag">${esc(label)}</span><span class="zh">Tap to zoom</span></div>`;
+  });
+  if (r.compare) h += `<div class="mock"><img src="${esc(imgUrl(r.compare))}" alt="Side by side" loading="lazy" onclick="zoom(this.src)"><span class="tag">Side by side</span><span class="zh">Tap to zoom</span></div>`;
+
+  if (photos.length && !isPfy) h += `<div class="blk"><div class="lbl2">Buyer's photos</div><div class="strip">${photos.slice(0, 10).map((p) => `<img src="${esc(imgUrl(p))}" alt="" loading="lazy" onclick="zoom(this.src)">`).join("")}</div></div>`;
+  if (r.note) h += `<div class="blk"><div class="lbl2">Designer's note</div><div class="note ${ui.noteOpen[id] ? "" : "clamp"}" onclick="ui.noteOpen['${esc(id)}']=!ui.noteOpen['${esc(id)}'];render()">${esc(r.note)}</div></div>`;
+  h += renderMessages(o, 3);
+
+  h += `<div class="acts">`;
+  if (ui.adjusting[id]) {
+    h += `<textarea id="ta-${esc(id)}" placeholder="What should change? Your words go to the designer exactly as you type them." oninput="draft('${esc(id)}', this.value)">${esc(ui.drafts[id] || "")}</textarea>`;
+    if (ui.errors[id]) h += `<div class="err">${esc(ui.errors[id])}</div>`;
+    h += `<button class="big go" ${ui.busy[id] ? "disabled" : ""} onclick="decide('${esc(id)}','adjust')">${ui.busy[id] ? "Sending…" : "Send changes"}</button>
+      <button class="cancel" onclick="setAdjust('${esc(id)}', false)">Cancel</button>`;
+  } else {
+    if (ui.errors[id]) h += `<div class="err">${esc(ui.errors[id])}</div>`;
+    if (opts.length) {
+      const label = isPfy ? "Approve & order" : (opts.length > 1 ? `Approve & send all ${opts.length}` : "Approve & send");
+      h += `<button class="big go" ${ui.busy[id] ? "disabled" : ""} onclick="decide('${esc(id)}','approve')">${ui.busy[id] === "approve" ? "Sending…" : label}</button>`;
+    }
+    h += `<button class="big alt" onclick="setAdjust('${esc(id)}', true)">Request changes</button>`;
+    if (opts.length) h += `<div class="explain">${isPfy ? "Approve places the print order." : `Approve sends ${opts.length > 1 ? "all " + opts.length + " designs" : "this design"} to ${esc(firstName(o))} on Etsy${opts.length > 1 ? " to pick from" : ""}.`}</div>`;
+  }
+  h += `</div><button class="cancel small" style="border-top:1px solid var(--line)" onclick="openOrder('${esc(id)}')">Order details ›</button></div>`;
+  return h;
+}
+
+function renderDecidedCard(o) {
+  const d = decisionFor(o);
+  return `<div class="card"><div class="card-hd"><div class="who" style="font-size:18px">${esc(o.buyer_first_name || "Buyer")}</div>
+    <div class="what">${esc(o.product || "")}</div></div><div class="acts" style="padding-top:0">${decisionStatus(d, o)}</div></div>`;
+}
+function decisionStatus(d, o) {
+  const s = deliveryState(d);
+  const what = d.action === "approve" ? (d.kind === "printify_mockup" ? "You approved the print order" : "You approved it") : "You asked for changes";
+  const next = d.action === "approve" ? (d.kind === "printify_mockup" ? "The print order is being placed." : `It's being sent to ${esc(o ? firstName(o) : "the buyer")}.`) : "The designer is working on a new version.";
+  if (s === "done") return `<div class="status ok">✓ ${what}. Done.<span class="s2">${esc(d.last_note || "")}</span></div>`;
+  if (s === "stuck") return `<div class="status bad">${what}, but ${esc(d.target_bot)} hasn't finished it.<span class="s2">The app reminded them ${Number(d.auto_wakes) || 0}×${d.last_note ? ". Last: " + esc(d.last_note) : ""}. Your decision is saved.</span><button onclick="retry('${esc(d.id)}', true)">Resend</button></div>`;
+  if (s === "picked_up") return `<div class="status ok">✓ ${what}. ${next}<span class="s2">Latest: ${esc(d.last_note || "")} (${esc(ago(d.last_note_at))})</span></div>`;
+  if (s === "waiting_pickup") return `<div class="status wait">✓ ${what}. Sent to the team ${esc(ago(d.decided_at))}.<span class="s2">Waiting for them to confirm they've started.</span></div>`;
+  if (s === "sending") return `<div class="status wait">${what}. Sending…</div>`;
+  return `<div class="status bad">${what}, but it didn't reach the team.<span class="s2">Your decision is saved.</span><button onclick="retry('${esc(d.id)}')">Resend</button></div>`;
+}
+
+function renderMessages(o, preview) {
+  const all = Array.isArray(o.messages) ? o.messages : [];
+  if (!all.length) return "";
+  const id = o.order_id, showAll = !!ui.allMsgs[id] || !preview;
+  const msgs = showAll ? all : all.slice(-preview);
+  let h = `<div class="blk"><div class="lbl2">${showAll ? "Messages with " + esc(firstName(o)) : "Latest messages with " + esc(firstName(o))}</div><div class="msgs">`;
+  for (const m of msgs) {
+    const shop = m.from === "shop";
+    h += `<div class="msg ${shop ? "shop" : "buyer"}"><div class="mw">${shop ? "You" : esc(firstName(o))}${m.at ? ` <span class="at">· ${esc(m.at)}</span>` : ""}</div>`;
+    if (m.text) h += showAll ? `<div class="tx">${esc(m.text)}</div>`
+      : `<div class="tx clamp" onclick="ui.allMsgs['${esc(id)}']=true;render()">${esc(m.text)}</div>`;
+    if (m.image) h += `<img src="${esc(imgUrl(m.image))}" alt="" loading="lazy" onclick="zoom(this.src)">`;
+    h += `</div>`;
+  }
+  h += `</div>`;
+  if (preview && all.length > preview) h += `<button class="linkbtn" onclick="ui.allMsgs['${esc(id)}']=!ui.allMsgs['${esc(id)}'];render()">${showAll ? "Show fewer" : "See all " + all.length + " messages"}</button>`;
+  return h + `</div>`;
+}
+
+// ---------------------------------------------------------------------------
+// Order details (tap a row)
+// ---------------------------------------------------------------------------
+function renderDetail(id) {
+  const o = STATE.orders.find((x) => x.order_id === id);
+  let h = `<div class="wrap"><button class="back" onclick="goBack()">‹ All orders</button>`;
+  if (!o) { $("app").innerHTML = h + `<div class="allgood">This order isn't on the board anymore.</div></div>`; return; }
+  if (o.stage === "needs_ok" && o.review && !decisionFor(o)) { $("app").innerHTML = h + renderNeedsCard(o) + `</div>`; return; }
+  const p = plain(o), f = flagFor(o);
+  h += `<h1>${esc(o.buyer_first_name || "Buyer")}</h1><div class="muted">${esc(o.product || "")}</div>
+    <span class="bigpill ${p.tone === "red" ? "red" : (o.stage === "delivered" || o.stage === "shipped") ? "green" : ""}">${esc(p.text)}</span>`;
+  if (f) h += `<div class="flag ${f.level}" style="margin:10px 0 0">${esc(f.text)}</div>`;
+  const d = decisionFor(o);
+  if (d) h += `<div style="margin-top:12px">${decisionStatus(d, o)}</div>`;
+
+  const facts = [];
+  if (o.next_step) facts.push(["What happens next", esc(o.next_step)]);
+  if (o.latest_request) facts.push(["Latest", esc(o.latest_request)]);
+  facts.push(["Etsy ship-by", esc(niceDate(o.ship_by))]);
+  if (o.tracking_number) facts.push(["Tracking", `<a class="track" href="${esc(trackingUrl(o.tracking_carrier, o.tracking_number))}" target="_blank" rel="noopener">${esc((o.tracking_carrier ? o.tracking_carrier + " " : "") + o.tracking_number)} ↗</a>`]);
+  else if (o.printify_est_ship) facts.push(["Printer ships about", esc(niceDate(o.printify_est_ship))]);
+  if (typeof o.etsy_net === "number" && typeof o.printify_cost === "number" && o.etsy_net > 0) {
+    const pr = o.etsy_net - o.printify_cost, pct = pr / o.etsy_net;
+    facts.push(["Profit", `<span style="color:var(${pct >= PROFIT_GOAL ? "--green" : "--red"})">${money(pr)} (${Math.round(pct * 100)}%)</span>`]);
+  }
+  if (o.updated_at) facts.push(["Last update", esc(o.updated_at)]);
+  facts.push(["Etsy order #", esc(o.order_id)]);
+  h += `<div class="facts">${facts.map(([k, v]) => `<div class="fact"><span class="k">${k}</span>${v}</div>`).join("")}</div>`;
+
+
+  const versions = Array.isArray(o.versions) ? o.versions.slice().reverse() : [];
+  if (versions.length) {
+    const v = versions[0];
+    h += `<div class="h2">Latest design${v.version ? " (" + esc(v.version) + ")" : ""}</div><div class="panel"><div class="grid">${(v.images || []).map((im) => `<img src="${esc(imgUrl(im.image))}" loading="lazy" alt="" onclick="zoom(this.src)">`).join("")}</div></div>`;
+    if (versions.length > 1) {
+      h += `<details style="margin-top:10px"><summary class="muted" style="padding:8px 2px">Older versions (${versions.length - 1})</summary>`;
+      for (const ov of versions.slice(1)) h += `<div class="panel" style="margin-top:8px"><b>${esc(ov.version || "")}</b><div class="grid" style="margin-top:6px">${(ov.images || []).map((im) => `<img src="${esc(imgUrl(im.image))}" loading="lazy" alt="" onclick="zoom(this.src)">`).join("")}</div></div>`;
+      h += `</details>`;
+    }
+  }
+  if ((o.messages || []).length) h += `<div class="h2">Messages</div><div class="panel" style="padding-bottom:12px">${renderMessages(o, 5).replace('class="blk"', 'class=""')}</div>`;
+  const photos = o.photos || [];
+  if (photos.length) h += `<div class="h2">Buyer's photos</div><div class="panel"><div class="grid">${photos.map((ph) => `<img src="${esc(imgUrl(ph))}" loading="lazy" alt="" onclick="zoom(this.src)">`).join("")}</div></div>`;
+
+  const hist = STATE.decisions.filter((x) => x.order_id === o.order_id);
+  if (hist.length) {
+    h += `<div class="h2">Your decisions</div><div class="facts">${hist.map((x) => {
+      const what = x.action === "approve" ? `Approved ${esc(x.version || "")}${x.option && x.option !== "all" ? " " + esc(x.option) : ""}` : `Asked for changes to ${esc(x.version || "")}: “${esc(x.adjust_text)}”`;
+      const st = { done: "done", picked_up: "being worked on", waiting_pickup: "sent, not picked up yet", sending: "sending", failed: "didn't go through" }[deliveryState(x)];
+      return `<div class="fact">${what}<div class="small muted">${esc(ptTime(x.decided_at))} · ${esc(st)}${x.last_note ? " · " + esc(x.last_note) : ""}</div></div>`;
+    }).join("")}</div>`;
+  }
+  $("app").innerHTML = h + `</div>`;
+}
+
+// ---------------------------------------------------------------------------
+// Small actions
+// ---------------------------------------------------------------------------
+function setAdjust(id, on) { ui.adjusting[id] = on; ui.errors[id] = ""; render(); if (on) setTimeout(() => { const t = $("ta-" + id); if (t) t.focus(); }, 30); }
+function draft(id, v) { ui.drafts[id] = v; }
+let HOME_SCROLL = 0;
+function openOrder(id) { HOME_SCROLL = window.scrollY; location.hash = "#order-" + encodeURIComponent(id); }
+function goBack() { location.hash = ""; }
+function zoom(src) { $("zoomimg").src = src; $("zoom").classList.remove("hide"); }
+function closeZoom() { $("zoom").classList.add("hide"); $("zoomimg").src = ""; }
+window.addEventListener("hashchange", () => { render(); window.scrollTo(0, location.hash ? 0 : HOME_SCROLL); });
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") load(true); });
+setInterval(() => { if (document.visibilityState === "visible" && !(document.activeElement && document.activeElement.matches("textarea"))) load(true); }, 60000);
+setInterval(() => { if (!location.hash && !(document.activeElement && document.activeElement.matches("textarea"))) render(); }, 30000); // keep "x min ago" honest
+
+// ---------------------------------------------------------------------------
+// Sample data for ?demo only (drawn placeholders, not real buyers)
+// ---------------------------------------------------------------------------
+function family(label, opts = {}) {
+  const w = 400, hgt = opts.h || 500, hue = opts.hue || 30, photo = !!opts.photo, people = opts.people || 3;
+  const bg = photo ? `hsl(${hue},18%,78%)` : `hsl(${hue},55%,90%)`;
+  let shapes = "";
+  const xs = people === 2 ? [0.36, 0.64] : people === 4 ? [0.2, 0.4, 0.6, 0.8] : [0.28, 0.5, 0.72];
+  xs.forEach((x, i) => {
+    const kid = people >= 3 && i === Math.floor(xs.length / 2);
+    const r = kid ? w * 0.075 : w * 0.095, cy = hgt * (kid ? 0.5 : 0.42), cx = w * x;
+    const skin = photo ? `hsl(${25 + i * 4},35%,${62 + i * 3}%)` : `hsl(30,70%,${82 - i * 2}%)`;
+    const shirt = photo ? `hsl(${hue + i * 60},20%,${40 + i * 6}%)` : `hsl(${hue + i * 70},60%,58%)`;
+    const hair = opts.longHair && i === 0 ? `<path d="M${cx - r * 1.15},${cy} q0,-${r * 1.9} ${r * 1.15},-${r * 1.2} q${r * 1.15},-${r * 0.7} ${r * 1.15},${r * 1.2} v${r * 1.6} h-${r * 0.35} v-${r * 1.3} h-${r * 1.6} v${r * 1.3} h-${r * 0.35}z" fill="${photo ? "hsl(25,35%,25%)" : "hsl(25,60%,30%)"}"/>`
+      : `<path d="M${cx - r},${cy - r * 0.2} q0,-${r * 1.1} ${r},-${r * 1.1} q${r},0 ${r},${r * 1.1} q-${r},-${r * 0.6} -${r * 2},0z" fill="${photo ? "hsl(25,30%,22%)" : "hsl(" + (20 + i * 15) + ",55%,28%)"}"/>`;
+    shapes += `<rect x="${cx - r * 1.25}" y="${cy + r * 0.9}" width="${r * 2.5}" height="${hgt - cy}" rx="${r}" fill="${shirt}"/>`;
+    shapes += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${skin}"/>` + hair;
+    if (!photo) shapes += `<circle cx="${cx - r * 0.35}" cy="${cy}" r="${r * 0.11}" fill="#222"/><circle cx="${cx + r * 0.35}" cy="${cy}" r="${r * 0.11}" fill="#222"/><path d="M${cx - r * 0.35},${cy + r * 0.35} q${r * 0.35},${r * 0.3} ${r * 0.7},0" stroke="#222" stroke-width="${r * 0.08}" fill="none"/>`;
+    else shapes += `<circle cx="${cx - r * 0.33}" cy="${cy}" r="${r * 0.07}" fill="#333"/><circle cx="${cx + r * 0.33}" cy="${cy}" r="${r * 0.07}" fill="#333"/>`;
+  });
+  if (opts.dog) shapes += `<ellipse cx="${w * 0.82}" cy="${hgt * 0.84}" rx="${w * 0.09}" ry="${w * 0.06}" fill="${photo ? "hsl(35,25%,55%)" : "hsl(35,60%,70%)"}"/><circle cx="${w * 0.9}" cy="${hgt * 0.78}" r="${w * 0.05}" fill="${photo ? "hsl(35,25%,50%)" : "hsl(35,60%,66%)"}"/>${opts.stitches ? `<path d="M${w * 0.78},${hgt * 0.82} l${w * 0.06},0 M${w * 0.79},${hgt * 0.805} l0,${w * 0.03} M${w * 0.81},${hgt * 0.805} l0,${w * 0.03} M${w * 0.83},${hgt * 0.805} l0,${w * 0.03}" stroke="#222" stroke-width="2"/>` : ""}`;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${hgt}" viewBox="0 0 ${w} ${hgt}"><rect width="100%" height="100%" fill="${bg}"/>${opts.frame ? `<rect x="14" y="14" width="${w - 28}" height="${hgt - 28}" fill="none" stroke="#1f1d1a" stroke-width="14"/>` : ""}${shapes}
+    <rect x="0" y="${hgt - 34}" width="100%" height="34" fill="rgba(0,0,0,0.45)"/><text x="50%" y="${hgt - 12}" font-family="sans-serif" font-size="16" text-anchor="middle" fill="#fff">${label}</text></svg>`;
+  return "data:image/svg+xml;utf8," + encodeURIComponent(svg);
+}
+function demoData() {
+  const t = todayPT(); // sample dates
+  const add = (n) => { const d = new Date(t + "T12:00:00Z"); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
+  const ago = (days) => new Date(Date.now() - days * 86400000 - 3600000).toISOString();
+  const kPhoto = family("Sample buyer photo", { photo: true, hue: 200, people: 2, dog: true });
+  const mPhoto1 = family("Sample buyer photo 1", { photo: true, hue: 120, people: 3 });
+  const mPhoto2 = family("Sample buyer photo 2", { photo: true, hue: 40, people: 3, longHair: true });
+  const mV3 = family("Sample mockup v3", { hue: 210, people: 3 });
+  const mV4 = family("Sample mockup v4", { hue: 210, people: 3, longHair: true });
+  return {
+    decisions: [
+      { id: "d-old", order_id: "1000000001", review_key: "1000000001|art_proof|v3", kind: "art_proof", action: "approve", option: null, version: "v3", target_bot: "Messanger", decided_by: "Derek", decided_at: ago(3), webhook_status: "delivered", status: "done", last_note: "Sent proof to buyer", last_note_by: "Messanger" },
+    ],
+    orders: [
+      { order_id: "1000000001", buyer_first_name: "Sample Buyer A", product: "Charlie Brown 5x7 matte print", status: "Waiting for Derek", stage: "needs_ok", stage_since: ago(0),
+        latest_request: "Can you make mom's hair longer, past her shoulders?", next_step: "v4 sent to Derek", ship_by: add(4), artist_bot: "Designer",
+        review: { kind: "art_proof", version: "v4", artist_bot: "Designer", note: "Hair now past the shoulders, everything else the same as v3.",
+          options: [{ label: null, image: mV4 }], photos: [mPhoto1, mPhoto2] },
+        versions: [{ version: "v3", images: [{ label: "", image: mV3 }] }, { version: "v4", images: [{ label: "", image: mV4 }] }],
+        photos: [mPhoto1, mPhoto2],
+        messages: [
+          { from: "buyer", at: "Nov 18, 2:14 PM PT", text: "Hi! Could you make a Charlie Brown portrait of our family? I'll attach a few photos." },
+          { from: "shop", at: "Nov 18, 2:31 PM PT", text: "I'd love to. I'll send a first mockup as soon as it's ready." },
+          { from: "shop", at: "Nov 19, 10:02 AM PT", text: "Here's the first version — take a look and tell me what you'd like changed." },
+          { from: "buyer", at: "Nov 19, 4:20 PM PT", text: "This is so close! Can you make mom's hair longer, past her shoulders?" },
+          { from: "shop", at: "Nov 19, 4:41 PM PT", text: "Absolutely — I'll send a new version with longer hair and keep everything else the same." },
+          { from: "buyer", at: "Nov 20, 8:05 AM PT", text: "Thank you!! Can't wait to see it." }
+        ] },
+      { order_id: "1000000002", buyer_first_name: "Sample Buyer B", product: "Nightmare 5x7 matte print", status: "Waiting for Derek", stage: "needs_ok", stage_since: ago(1),
+        latest_request: "Couple with their dog, Nightmare style, dog with stitches", next_step: "v1 options sent to Derek", ship_by: add(5), artist_bot: "Designer 2",
+        review: { kind: "art_proof", version: "v1", artist_bot: "Designer 2", note: "B keeps the softer faces.",
+          options: [{ label: "A", image: family("Sample mockup A", { hue: 280, people: 2, dog: true, stitches: true }) }, { label: "B", image: family("Sample mockup B", { hue: 320, people: 2, dog: true, stitches: true }) }],
+          photos: [kPhoto] },
+        photos: [kPhoto] },
+      { order_id: "1000000003", buyer_first_name: "Sample Buyer C", product: "Charlie Brown 12x16 canvas", status: "Waiting for Derek", stage: "needs_ok", stage_since: ago(2), ship_by: add(2),
+        latest_request: "Buyer approved v2", next_step: "Derek to OK the Printify mockup", artist_bot: "Designer",
+        review: { kind: "printify_mockup", version: "pfy1", note: "12x16 canvas, black edge wrap.", options: [{ label: null, image: family("Sample Printify canvas mockup", { hue: 30, people: 4, frame: true, h: 420 }) }] },
+        etsy_net: 67.05, printify_cost: 50.78 },
+      { order_id: "1000000004", buyer_first_name: "Sample Buyer D", product: "Charlie Brown 5x7 matte print", status: "In production", stage: "printing", stage_since: ago(1),
+        latest_request: "Approved v8c", next_step: "Watch for tracking.", ship_by: add(2), printify_order_id: "10000000.01", printify_est_ship: add(4) },
+      { order_id: "1000000005", buyer_first_name: "Sample Buyer E", product: "Pet Christmas 11x14 poster", status: "Needs mockup", stage: "artist", stage_since: ago(0), ship_by: add(8),
+        latest_request: "Two dogs, wants the red scarf", next_step: "WORKING NOW: Designer 3 v1 mockup", artist_bot: "Designer 3" },
+      { order_id: "1000000006", buyer_first_name: "Sample Buyer F", product: "Buddy the Elf 8x10 framed", status: "Waiting on buyer", stage: "waiting_buyer", stage_since: ago(3), ship_by: add(6) },
+      { order_id: "1000000007", buyer_first_name: "Sample Buyer G", product: "Nightmare 8x10 poster", status: "Waiting on buyer", stage: "waiting_buyer", stage_since: ago(0), ship_by: add(9) },
+      { order_id: "1000000008", buyer_first_name: "Sample Buyer H", product: "Nightmare 12x16 canvas", status: "Approved - ordering", stage: "ordering", stage_since: ago(0), ship_by: add(7) },
+      { order_id: "1000000009", buyer_first_name: "Sample Buyer I", product: "Charlie Brown 5x7 matte print", status: "Shipped", stage: "shipped", stage_since: ago(2), ship_by: add(-3),
+        tracking_carrier: "DHL", tracking_number: "REDACTED", tracking_note: "on the way" },
+      { order_id: "1000000010", buyer_first_name: "Sample Buyer J", product: "Pet Christmas 5x7 print", status: "Delivered", stage: "delivered", stage_since: ago(4) },
+      { order_id: "1000000011", buyer_first_name: "Sample Buyer K", product: "Charlie Brown 16x20 canvas", status: "Delivered", stage: "delivered", stage_since: ago(6) },
+    ],
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Start
+// ---------------------------------------------------------------------------
+async function start() {
+  const params = new URLSearchParams(location.search);
+  if (params.has("demo")) { DEMO = true; STATE = demoData(); render(); return; }
+  try {
+    const res = await fetch("/api/me", { credentials: "same-origin" });
+    if (res.status === 401) { showLogin(); return; }
+    if (!res.ok) throw new Error("server");
+    await load(true);
+  } catch (e) {
+    $("app").innerHTML = `<div class="login"><h1>Viva Orders</h1><p class="muted">Can't reach the app right now. Check your connection.</p>
+      <button class="big go" onclick="start()">Try again</button></div>`;
+  }
+}
+start();
+</script>
+</body>
+</html>

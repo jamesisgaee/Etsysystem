@@ -1,0 +1,35 @@
+# Secrets and keys (never commit)
+.viva_app*
+.viva_webhooks.json
+.viva_push_cache.json
+.env
+.env.*
+.dev.vars
+*.dev.vars
+*secret*
+*token*
+*.key
+*.pem
+openai-api.json
+*api*.json
+# Build / tool output
+node_modules/
+.wrangler/
+__pycache__/
+# Backups and review dumps
+backups/
+*.bak*
+*_v_old.*
+screenshots-review/
+box/
+# Buyer PII: order folders, tracker, board, photos and art
+orders/*/
+!orders/STYLE_GUIDES/
+ORDER_TRACKER*
+board_*
+*.jpg
+*.jpeg
+*.webp
+orders/**/*.png
+orders/STYLE_GUIDES/refs/
+orders/STYLE_GUIDES/_v1_backup/
